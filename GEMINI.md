@@ -17,7 +17,7 @@
 - **HTML / UI:** `index.html` — Layout semántico responsive, optimizado para dispositivos móviles y escritorio, soporte para Dark Mode (`slate-900`).
 - **Lógica de Negocio (Vanilla JS):** `app.js` — Sin frameworks ni librerías pesadas. Control de ciclo de vida, consultas API asíncronas con reintentos (`fetchWithRetry`), cálculos de ensamble meteorológico, evaluación de reglas y renderizado DOM.
 - **Estilos CSS:** `style.css` (generado desde `input.css` / Tailwind CSS) — Diseño dinámico, glassmorphism, badges de color contextuales, animaciones de carga y transiciones fluidas.
-- **Motor de Reglas:** `beach_rules.json` — Reglas de negocio desacopladas del código ejecutable para fácil mantenimiento y personalización por playa.
+- **Motor de Reglas y Textos:** `beach_rules.json` (reglas y umbrales) y `ui_texts.json` (textos de la interfaz desacoplados del código para fácil modificación).
 - **PWA & Offline:** `manifest.json` y `sw.js` — Service Worker nativo para instalación en pantalla de inicio e interacción offline.
 - **Visualización Gráfica:** HTML5 `<canvas id="sparkline">` para dibujar tendencias de viento sin librerías externas.
 - **Pruebas / Verificación:** `test.js` — Pruebas de integración nativas mediante `jsdom`.
@@ -59,6 +59,7 @@ pozometeo/
 ├── index.html         # Interfaz visual responsive y contenedores dinámicos
 ├── app.js             # Lógica multi-modelo, fetch con reintentos, evaluador híbrido y sparkline canvas
 ├── beach_rules.json   # Configuración y umbrales de seguridad (viento y oleaje)
+├── ui_texts.json      # Todos los textos de la interfaz de usuario personalizables
 ├── style.css          # Estilos optimizados y utilidades visuales
 ├── input.css          # Fichero fuente de estilos
 ├── manifest.json      # Configuración de PWA (iconos, tema, display standalone)

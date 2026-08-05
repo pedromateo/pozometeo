@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pozo-bano-v3.7-static';
+const CACHE_NAME = 'pozo-bano-v3.10-static';
 const DATA_CACHE_NAME = 'pozo-bano-v3-data';
 const ASSETS = [
   './', 
@@ -6,6 +6,7 @@ const ASSETS = [
   './app.js', 
   './style.css',
   './beach_rules.json',
+  './ui_texts.json',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'

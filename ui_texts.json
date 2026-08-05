@@ -1,0 +1,36 @@
+{
+  "header": {
+    "title": "Pozo del Esparto",
+    "location": "📍 Cuevas del Almanzora, Almería",
+    "live_badge": "En Vivo"
+  },
+  "loader": {
+    "loading_text": "Analizando viento, UV y oleaje multi-modelo..."
+  },
+  "offline_card": {
+    "title": "Sin Conexión",
+    "description": "No hemos podido obtener los datos y no hay información guardada en tu dispositivo. Por favor, conéctate a internet e inténtalo de nuevo.",
+    "retry_button": "Reintentar"
+  },
+  "offline_indicator": {
+    "label": "Mostrando predicción guardada (Sin conexión)"
+  },
+  "main_card": {
+    "now_label": "AHORA",
+    "forecast_prefix": "Previsión",
+    "uv_prefix": "☀️ UV:",
+    "wind_label": "💨 Viento (Orilla)",
+    "wave_label": "🌊 Oleaje",
+    "sparkline_title_prefix": "Tendencia del Viento"
+  },
+  "day_selector": {
+    "day_0": "Hoy",
+    "day_1": "Hoy+1",
+    "day_2": "Hoy+2"
+  },
+  "hourly_section": {
+    "title": "Evolución (08:00 - 20:00)",
+    "optimal_badge": "✨ Óptimo",
+    "refresh_button": "🔄 Refrescar Datos"
+  }
+}

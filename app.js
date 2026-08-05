@@ -11,7 +11,52 @@ async function fetchWithRetry(url, retries = 3) {
   }
 }
 
+let selectedDayIndex = 0; // 0 = Hoy, 1 = Hoy+1, 2 = Hoy+2
+let fetchedApiData = null;
 let currentForecastData = []; 
+let uiTextsConfig = null;
+
+const fallbackUITexts = {
+  "header": { "title": "Pozo del Esparto", "location": "📍 Cuevas del Almanzora, Almería", "live_badge": "En Vivo" },
+  "loader": { "loading_text": "Analizando viento, UV y oleaje multi-modelo..." },
+  "offline_card": {
+    "title": "Sin Conexión",
+    "description": "No hemos podido obtener los datos y no hay información guardada en tu dispositivo. Por favor, conéctate a internet e inténtalo de nuevo.",
+    "retry_button": "Reintentar"
+  },
+  "offline_indicator": { "label": "Mostrando predicción guardada (Sin conexión)" },
+  "main_card": {
+    "now_label": "AHORA",
+    "forecast_prefix": "Previsión",
+    "uv_prefix": "☀️ UV:",
+    "wind_label": "💨 Viento (Orilla)",
+    "wave_label": "🌊 Oleaje",
+    "sparkline_title_prefix": "Tendencia del Viento"
+  },
+  "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
+  "hourly_section": {
+    "title": "Evolución (08:00 - 20:00)",
+    "optimal_badge": "✨ Óptimo",
+    "refresh_button": "🔄 Refrescar Datos"
+  }
+};
+
+function applyUITexts(texts) {
+  if (!texts) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const keyPath = el.getAttribute('data-i18n').split('.');
+    let val = texts;
+    for (const key of keyPath) {
+      if (val && val[key] !== undefined) {
+        val = val[key];
+      } else {
+        val = null;
+        break;
+      }
+    }
+    if (val) el.textContent = val;
+  });
+}
 
 async function initApp() {
   document.getElementById('loader').classList.remove('hidden');
@@ -22,11 +67,13 @@ async function initApp() {
   let isOffline = !navigator.onLine;
 
   try {
-    const GENERAL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=temperature_2m,precipitation_probability,uv_index&timezone=Europe/Madrid&forecast_days=2';
-    const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=2&wind_speed_unit=kmh';
-    const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height&timezone=Europe/Madrid&forecast_days=2';
+    const GENERAL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=temperature_2m,precipitation_probability,uv_index&timezone=Europe/Madrid&forecast_days=3';
+    const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=3&wind_speed_unit=kmh';
+    const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height&timezone=Europe/Madrid&forecast_days=3';
 
     const RULES_URL = './beach_rules.json';
+    const TEXTS_URL = './ui_texts.json';
+
     const fallbackRulesConfig = {
       "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
       "global_wave_rules": [
@@ -42,13 +89,17 @@ async function initApp() {
       ]
     };
 
-    const [generalData, windData, marineData, fetchedRules] = await Promise.all([
+    const [generalData, windData, marineData, fetchedRules, fetchedTexts] = await Promise.all([
       fetchWithRetry(GENERAL_URL),
       fetchWithRetry(WIND_MULTI_MODEL_URL),
       fetchWithRetry(MARINE_URL),
-      fetchWithRetry(RULES_URL).catch(() => fallbackRulesConfig)
+      fetchWithRetry(RULES_URL).catch(() => fallbackRulesConfig),
+      fetchWithRetry(TEXTS_URL).catch(() => fallbackUITexts)
     ]);
     const rulesConfig = fetchedRules || fallbackRulesConfig;
+    uiTextsConfig = fetchedTexts || fallbackUITexts;
+
+    applyUITexts(uiTextsConfig);
 
     if (!generalData || !generalData.hourly) {
         throw new Error("Invalid API Data");
@@ -58,62 +109,96 @@ async function initApp() {
         document.getElementById('offline-indicator').classList.remove('hidden');
     }
 
-    const currentHourReal = new Date().getHours();
-    const isNextDay = currentHourReal > 20;
-    const dayOffset = isNextDay ? 24 : 0; 
+    fetchedApiData = { generalData, windData, marineData, rulesConfig };
     
-    document.getElementById('day-label').textContent = isNextDay ? "Mañana" : "Hoy";
-
-    const hourlyForecast = [];
-    for (let h = 8; h <= 20; h++) {
-      const apiIndex = dayOffset + h;
-      
-      const speeds = [
-        windData.hourly.windspeed_10m_ecmwf_ifs04[apiIndex],
-        windData.hourly.windspeed_10m_gfs_seamless[apiIndex],
-        windData.hourly.windspeed_10m_icon_seamless[apiIndex]
-      ].filter(v => v !== null && v !== undefined);
-
-      const dirs = [
-        windData.hourly.winddirection_10m_ecmwf_ifs04[apiIndex],
-        windData.hourly.winddirection_10m_gfs_seamless[apiIndex],
-        windData.hourly.winddirection_10m_icon_seamless[apiIndex]
-      ].filter(v => v !== null && v !== undefined);
-
-      const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
-
-      let sumSin = 0, sumCos = 0;
-      dirs.forEach(d => {
-        const rad = d * (Math.PI / 180);
-        sumSin += Math.sin(rad);
-        sumCos += Math.cos(rad);
-      });
-      let avgDir = (Math.atan2(sumSin, sumCos) * (180 / Math.PI) + 360) % 360;
-
-      const temp = generalData.hourly.temperature_2m[apiIndex];
-      const rain = generalData.hourly.precipitation_probability[apiIndex] || 0;
-      const uv = generalData.hourly.uv_index[apiIndex] || 0;
-      const wave = marineData.hourly.wave_height[apiIndex] || 0;
-
-      const finalSpeed = parseFloat(avgSpeed.toFixed(1));
-      const finalDir = Math.round(avgDir);
-
-      const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rulesConfig);
-      hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, ...evalResult });
-    }
-
-    currentForecastData = hourlyForecast;
-    renderUI(hourlyForecast, currentHourReal, isNextDay);
-
     document.getElementById('loader').classList.add('hidden');
     document.getElementById('content').classList.remove('hidden');
-    drawSparkline(currentForecastData); 
+
+    updateDayView(selectedDayIndex);
 
   } catch (error) {
     console.error("Error cargando datos:", error);
     document.getElementById('loader').classList.add('hidden');
     document.getElementById('error-card').classList.remove('hidden');
   }
+}
+
+function selectDay(dayIndex) {
+  selectedDayIndex = dayIndex;
+  if (fetchedApiData) {
+    updateDayView(selectedDayIndex);
+  } else {
+    initApp();
+  }
+}
+
+function getGlobalMaxWind() {
+  if (!fetchedApiData) return 20;
+  const { windData, rulesConfig } = fetchedApiData;
+  const factor = rulesConfig.beach_info ? rulesConfig.beach_info.wind_adjustment_factor || 1.125 : 1.125;
+  let max = 20;
+  for (let i = 0; i < 72; i++) {
+    const speeds = [
+      windData.hourly.windspeed_10m_ecmwf_ifs04[i],
+      windData.hourly.windspeed_10m_gfs_seamless[i],
+      windData.hourly.windspeed_10m_icon_seamless[i]
+    ].filter(v => v !== null && v !== undefined);
+    if (speeds.length > 0) {
+      const avg = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+      const adj = avg * factor;
+      if (adj > max) max = adj;
+    }
+  }
+  return parseFloat(max.toFixed(1));
+}
+
+function updateDayView(dayIndex) {
+  if (!fetchedApiData) return;
+  const { generalData, windData, marineData, rulesConfig } = fetchedApiData;
+  const currentHourReal = new Date().getHours();
+  const dayOffset = dayIndex * 24;
+
+  const hourlyForecast = [];
+  for (let h = 8; h <= 20; h++) {
+    const apiIndex = dayOffset + h;
+    
+    const speeds = [
+      windData.hourly.windspeed_10m_ecmwf_ifs04[apiIndex],
+      windData.hourly.windspeed_10m_gfs_seamless[apiIndex],
+      windData.hourly.windspeed_10m_icon_seamless[apiIndex]
+    ].filter(v => v !== null && v !== undefined);
+
+    const dirs = [
+      windData.hourly.winddirection_10m_ecmwf_ifs04[apiIndex],
+      windData.hourly.winddirection_10m_gfs_seamless[apiIndex],
+      windData.hourly.winddirection_10m_icon_seamless[apiIndex]
+    ].filter(v => v !== null && v !== undefined);
+
+    const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+
+    let sumSin = 0, sumCos = 0;
+    dirs.forEach(d => {
+      const rad = d * (Math.PI / 180);
+      sumSin += Math.sin(rad);
+      sumCos += Math.cos(rad);
+    });
+    let avgDir = (Math.atan2(sumSin, sumCos) * (180 / Math.PI) + 360) % 360;
+
+    const temp = generalData.hourly.temperature_2m[apiIndex];
+    const rain = generalData.hourly.precipitation_probability[apiIndex] || 0;
+    const uv = generalData.hourly.uv_index[apiIndex] || 0;
+    const wave = marineData.hourly.wave_height[apiIndex] || 0;
+
+    const finalSpeed = parseFloat(avgSpeed.toFixed(1));
+    const finalDir = Math.round(avgDir);
+
+    const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rulesConfig);
+    hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, ...evalResult });
+  }
+
+  currentForecastData = hourlyForecast;
+  renderUI(hourlyForecast, currentHourReal, dayIndex);
+  drawSparkline(currentForecastData, getGlobalMaxWind());
 }
 
 function evaluateStatus(speed, dir, wave, config) {
@@ -135,12 +220,16 @@ function getWindArrowSVG(dir, sizePx = 20, strokeColor = "currentColor") {
   return `<svg style="width:${sizePx}px; height:${sizePx}px; transform: rotate(${dir}deg); display: inline-block; vertical-align: middle; flex-shrink: 0; stroke: ${strokeColor}; transition: transform 0.3s ease;" fill="none" stroke-width="2.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"></line><polyline points="19 14 12 21 5 14"></polyline></svg>`;
 }
 
-function renderUI(forecast, currentHourReal, isNextDay) {
-  let activeForecast = forecast.find(f => f.hour === currentHourReal && !isNextDay);
+function renderUI(forecast, currentHourReal, dayIndex) {
+  const texts = uiTextsConfig || fallbackUITexts;
+  const dayNames = [texts.day_selector.day_0, texts.day_selector.day_1, texts.day_selector.day_2];
+  const isToday = (dayIndex === 0);
+
+  let activeForecast = forecast.find(f => f.hour === currentHourReal && isToday);
   if (!activeForecast) activeForecast = forecast[0];
 
   document.getElementById('main-status-card').style.backgroundColor = activeForecast.color;
-  document.getElementById('card-time').textContent = !isNextDay && currentHourReal >= 8 && currentHourReal <= 20 ? "AHORA" : `Previsión ${activeForecast.hour}:00h`;
+  document.getElementById('card-time').textContent = isToday && currentHourReal >= 8 && currentHourReal <= 20 ? texts.main_card.now_label : `${texts.main_card.forecast_prefix} ${activeForecast.hour}:00h`;
   document.getElementById('card-badge').textContent = activeForecast.badge;
   document.getElementById('card-desc').textContent = activeForecast.desc;
   
@@ -155,14 +244,32 @@ function renderUI(forecast, currentHourReal, isNextDay) {
   document.getElementById('card-wave').textContent = `${activeForecast.wave} m`;
 
   const uvElement = document.getElementById('card-uv');
-  uvElement.textContent = `☀️ UV: ${Math.round(activeForecast.uv)}`;
+  uvElement.textContent = `${texts.main_card.uv_prefix} ${Math.round(activeForecast.uv)}`;
   uvElement.className = activeForecast.uv > 7 ? "text-xs font-bold bg-red-500 text-white px-2 py-1 rounded shadow-sm" : "text-xs font-bold bg-amber-500/90 text-white px-2 py-1 rounded shadow-sm"; 
+
+  const sparklineTitle = document.getElementById('sparkline-title');
+  if (sparklineTitle) {
+    sparklineTitle.textContent = `${texts.main_card.sparkline_title_prefix} ${dayNames[dayIndex] || dayNames[0]}`;
+  }
+
+  // Update Day Selector Buttons
+  [0, 1, 2].forEach(i => {
+    const btn = document.getElementById(`btn-day-${i}`);
+    if (btn) {
+      btn.textContent = dayNames[i] || `Día ${i}`;
+      if (i === dayIndex) {
+        btn.className = "px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-bold bg-[#0072ce] text-white shadow-xs transition-all cursor-pointer";
+      } else {
+        btn.className = "px-2.5 py-1 rounded-md text-[11px] sm:text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/80 transition-all cursor-pointer";
+      }
+    }
+  }); 
 
   const listContainer = document.getElementById('hourly-list');
   listContainer.innerHTML = '';
 
   forecast.forEach(item => {
-    const isCurrent = item.hour === currentHourReal && !isNextDay;
+    const isCurrent = item.hour === currentHourReal && isToday;
     const isOptimal = item.hour >= 8 && item.hour <= 10;
     
     const row = document.createElement('div');
@@ -176,7 +283,7 @@ function renderUI(forecast, currentHourReal, isNextDay) {
         <div>
           <div class="flex items-center space-x-1.5 flex-wrap">
             <span class="text-xs sm:text-sm font-bold text-slate-900">${item.badge}</span>
-            ${isOptimal ? '<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">✨ Óptimo</span>' : ''}
+            ${isOptimal ? `<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">${texts.hourly_section.optimal_badge}</span>` : ''}
           </div>
           <p class="text-xs sm:text-sm text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
@@ -196,16 +303,19 @@ function renderUI(forecast, currentHourReal, isNextDay) {
   });
 }
 
-function drawSparkline(forecast) {
+function drawSparkline(forecast, fixedMaxWind) {
   const canvas = document.getElementById('sparkline');
-  if (!canvas || forecast.length === 0) return;
+  if (!canvas || !forecast || forecast.length === 0) return;
+  const parent = canvas.parentElement;
+  if (!parent || parent.clientWidth === 0 || parent.clientHeight === 0) return;
+
   const ctx = canvas.getContext('2d');
   
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
+  canvas.width = parent.clientWidth;
+  canvas.height = parent.clientHeight;
   const width = canvas.width, height = canvas.height;
   
-  const maxWind = Math.max(...forecast.map(f => parseFloat(f.adjSpeed)), 20); 
+  const maxWind = fixedMaxWind || getGlobalMaxWind();
   const minWind = 0;
 
   ctx.clearRect(0, 0, width, height);
@@ -228,7 +338,7 @@ function drawSparkline(forecast) {
   ctx.fill();
 }
 
-window.addEventListener('resize', () => drawSparkline(currentForecastData));
+window.addEventListener('resize', () => drawSparkline(currentForecastData, getGlobalMaxWind()));
 
 window.addEventListener('online', () => {
   if(!document.getElementById('content').classList.contains('hidden')) {
