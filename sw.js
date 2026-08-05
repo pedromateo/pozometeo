@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pozo-bano-v3.4-static';
+const CACHE_NAME = 'pozo-bano-v3.5-static';
 const DATA_CACHE_NAME = 'pozo-bano-v3-data';
 const ASSETS = [
   './', 

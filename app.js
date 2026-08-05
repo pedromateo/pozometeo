@@ -175,7 +175,6 @@ function renderUI(forecast, currentHourReal, isNextDay) {
         </div>
         <div>
           <div class="flex items-center space-x-1.5 flex-wrap">
-            <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style="background-color: ${item.color}"></span>
             <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${item.badge}</span>
             ${isOptimal ? '<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200 dark:border-amber-800">✨ Óptimo</span>' : ''}
           </div>
