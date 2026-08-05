@@ -20,13 +20,13 @@
     }
   </script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col items-center transition-colors duration-300">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center transition-colors duration-300">
 
-  <header class="bg-[#0072ce] dark:bg-blue-900 text-white shadow-md w-full">
+  <header class="bg-[#0072ce] text-white shadow-md w-full">
     <div class="max-w-xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
       <div>
         <h1 class="text-lg sm:text-xl font-black tracking-tight">Pozo del Esparto</h1>
-        <p class="text-[11px] sm:text-xs text-blue-100 dark:text-blue-300">Cuevas del Almanzora, Almería</p>
+        <p class="text-[11px] sm:text-xs text-blue-100">Cuevas del Almanzora, Almería</p>
       </div>
       <span class="text-[10px] sm:text-xs bg-white/20 px-2 py-1 rounded font-bold uppercase tracking-wider">Estado del Baño</span>
     </div>
@@ -34,16 +34,16 @@
 
   <main class="w-full max-w-xl px-4 py-4 sm:py-8 space-y-4 sm:space-y-6 flex-grow">
     
-    <div id="loader" class="bg-white dark:bg-slate-800 rounded-2xl p-10 text-center space-y-3 border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div id="loader" class="bg-white rounded-2xl p-10 text-center space-y-3 border border-slate-200 shadow-sm">
       <div class="inline-block w-10 h-10 border-4 border-[#0072ce] border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-slate-600 dark:text-slate-300 font-semibold text-sm">Analizando viento, UV y oleaje multi-modelo...</p>
+      <p class="text-slate-600 font-semibold text-sm">Analizando viento, UV y oleaje multi-modelo...</p>
     </div>
 
     <!-- Error UI Offline -->
-    <div id="error-card" class="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6 text-center space-y-4 shadow-sm mx-4">
+    <div id="error-card" class="hidden bg-red-50 border border-red-200 rounded-2xl p-6 text-center space-y-4 shadow-sm mx-4">
       <div class="text-3xl">📡</div>
-      <h3 class="text-lg font-bold text-red-800 dark:text-red-300">Sin Conexión</h3>
-      <p class="text-sm text-red-600 dark:text-red-400">No hemos podido obtener los datos y no hay información guardada en tu dispositivo. Por favor, conéctate a internet e inténtalo de nuevo.</p>
+      <h3 class="text-lg font-bold text-red-800">Sin Conexión</h3>
+      <p class="text-sm text-red-600">No hemos podido obtener los datos y no hay información guardada en tu dispositivo. Por favor, conéctate a internet e inténtalo de nuevo.</p>
       <button onclick="initApp()" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all active:scale-[0.98]">
         Reintentar
       </button>
@@ -52,8 +52,8 @@
     <div id="content" class="hidden space-y-4 sm:space-y-6">
       
       <!-- Offline Indicator -->
-      <div id="offline-indicator" class="hidden bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 rounded-xl p-3 flex items-center justify-between shadow-sm">
-        <span class="text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-2">
+      <div id="offline-indicator" class="hidden bg-amber-100 border border-amber-200 rounded-xl p-3 flex items-center justify-between shadow-sm">
+        <span class="text-amber-800 text-xs font-bold flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Mostrando predicción guardada (Sin conexión)
         </span>
       </div>
@@ -88,15 +88,15 @@
         </div>
       </section>
 
-      <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
-        <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-          <h3 class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Evolución (08:00 - 20:00)</h3>
-          <span id="day-label" class="text-[11px] sm:text-xs bg-slate-200 dark:bg-slate-700 px-2.5 py-1 rounded text-slate-600 dark:text-slate-300 font-bold">--</span>
+      <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden transition-colors">
+        <div class="px-4 py-3 sm:px-6 sm:py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+          <h3 class="text-xs sm:text-sm font-bold text-slate-700 uppercase tracking-wider">Evolución (08:00 - 20:00)</h3>
+          <span id="day-label" class="text-[11px] sm:text-xs bg-slate-200 px-2.5 py-1 rounded text-slate-600 font-bold">--</span>
         </div>
-        <div id="hourly-list" class="divide-y divide-slate-100 dark:divide-slate-700"></div>
+        <div id="hourly-list" class="divide-y divide-slate-100"></div>
       </section>
 
-      <button onclick="initApp()" class="w-full py-3 sm:py-4 bg-[#0072ce] dark:bg-blue-600 hover:bg-[#005ba4] text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-all active:scale-[0.98]">
+      <button onclick="initApp()" class="w-full py-3 sm:py-4 bg-[#0072ce] hover:bg-[#005ba4] text-white font-bold text-sm sm:text-base rounded-xl shadow-sm transition-all active:scale-[0.98]">
         🔄 Refrescar Datos
       </button>
     </div>

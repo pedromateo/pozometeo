@@ -166,30 +166,30 @@ function renderUI(forecast, currentHourReal, isNextDay) {
     const isOptimal = item.hour >= 8 && item.hour <= 10;
     
     const row = document.createElement('div');
-    row.className = `p-3 sm:px-6 sm:py-4 flex items-center justify-between transition-colors ${isCurrent ? 'bg-blue-50/80 dark:bg-blue-900/30 border-l-4 border-[#0072ce] dark:border-blue-400' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'}`;
+    row.className = `p-3 sm:px-6 sm:py-4 flex items-center justify-between transition-colors ${isCurrent ? 'bg-blue-50/80 border-l-4 border-[#0072ce]' : 'hover:bg-slate-50'}`;
 
     row.innerHTML = `
       <div class="flex items-center space-x-3 sm:space-x-4 w-1/2">
         <div class="flex flex-col items-center">
-          <span class="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">${String(item.hour).padStart(2, '0')}:00</span>
+          <span class="text-xs sm:text-sm font-bold text-slate-700">${String(item.hour).padStart(2, '0')}:00</span>
         </div>
         <div>
           <div class="flex items-center space-x-1.5 flex-wrap">
-            <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${item.badge}</span>
-            ${isOptimal ? '<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200 dark:border-amber-800">✨ Óptimo</span>' : ''}
+            <span class="text-xs sm:text-sm font-bold text-slate-900">${item.badge}</span>
+            ${isOptimal ? '<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">✨ Óptimo</span>' : ''}
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
+          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
       </div>
       <div class="text-right text-xs sm:text-sm w-1/2">
-        <div class="font-bold text-slate-800 dark:text-slate-200" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
-          <span>💨 ${item.adjSpeed} <span class="text-[10px] sm:text-xs font-normal text-slate-500 dark:text-slate-400">km/h</span></span>
+        <div class="font-bold text-slate-800" style="display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+          <span>💨 ${item.adjSpeed} <span class="text-[10px] sm:text-xs font-normal text-slate-500">km/h</span></span>
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 9999px; background-color: rgba(0, 114, 206, 0.15); color: #0072ce;" title="Dirección del viento: ${item.dir}°">
             ${getWindArrowSVG(item.dir, 18, "#0072ce")}
           </span>
           <span style="margin-left: 4px;">| 🌊 ${item.wave}m</span>
         </div>
-        <p class="text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 text-[11px] sm:text-xs">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
+        <p class="text-slate-500 mt-0.5 sm:mt-1 text-[11px] sm:text-xs">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
       </div>
     `;
     listContainer.appendChild(row);
