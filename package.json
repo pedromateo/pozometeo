@@ -1,4 +1,10 @@
 {
+  "name": "pozometeo",
+  "version": "3.0.0",
+  "description": "Estado del Baño - Pozo del Esparto",
+  "scripts": {
+    "test": "node test.js"
+  },
   "dependencies": {
     "jsdom": "^30.0.1"
   }

@@ -5,6 +5,8 @@ const ASSETS = [
   './index.html', 
   './app.js', 
   './style.css',
+  './beach_rules.json',
+  './manifest.json',
   './icon-192.png',
   './icon-512.png'
 ];

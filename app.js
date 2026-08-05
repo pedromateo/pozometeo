@@ -26,63 +26,29 @@ async function initApp() {
     const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=2&wind_speed_unit=kmh';
     const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height&timezone=Europe/Madrid&forecast_days=2';
 
-    const rulesConfig = {
-      "beach_info": {
-        "id": "pozo_del_esparto",
-        "name": "Pozo del Esparto",
-        "wind_adjustment_factor": 1.125
-      },
+    const RULES_URL = './beach_rules.json';
+    const fallbackRulesConfig = {
+      "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
       "global_wave_rules": [
         { "max_height_m": 0.6, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Oleaje tranquilo" },
         { "max_height_m": 1.1, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Precaución: Presencia de oleaje" },
         { "max_height_m": 99.0, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Prohibido / Peligro: Mar de fondo" }
       ],
       "rules": [
-        {
-          "id": "offshore",
-          "dir_min_deg": 270,
-          "dir_max_deg": 330,
-          "thresholds": [
-            { "max_speed_kmh": 999, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }
-          ]
-        },
-        {
-          "id": "perpendicular",
-          "dir_min_deg": 60,
-          "dir_max_deg": 100,
-          "thresholds": [
-            { "max_speed_kmh": 8,  "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" },
-            { "max_speed_kmh": 12, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" },
-            { "max_speed_kmh": 999,"level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }
-          ]
-        },
-        {
-          "id": "diagonal",
-          "dir_min_deg": 101,
-          "dir_max_deg": 135,
-          "thresholds": [
-            { "max_speed_kmh": 11, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar rizada suave" },
-            { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" },
-            { "max_speed_kmh": 999,"level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }
-          ]
-        },
-        {
-          "id": "parallel_or_other",
-          "dir_min_deg": 0,
-          "dir_max_deg": 360,
-          "thresholds": [
-            { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" },
-            { "max_speed_kmh": 999, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento fuerte lateral" }
-          ]
-        }
+        { "id": "offshore", "dir_min_deg": 270, "dir_max_deg": 330, "thresholds": [{ "max_speed_kmh": 999, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }] },
+        { "id": "perpendicular", "dir_min_deg": 60, "dir_max_deg": 100, "thresholds": [{ "max_speed_kmh": 8, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 12, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }] },
+        { "id": "diagonal", "dir_min_deg": 101, "dir_max_deg": 135, "thresholds": [{ "max_speed_kmh": 11, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar rizada suave" }, { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }] },
+        { "id": "parallel_or_other", "dir_min_deg": 0, "dir_max_deg": 360, "thresholds": [{ "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" }, { "max_speed_kmh": 999, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento fuerte lateral" }] }
       ]
     };
 
-    const [generalData, windData, marineData] = await Promise.all([
+    const [generalData, windData, marineData, fetchedRules] = await Promise.all([
       fetchWithRetry(GENERAL_URL),
       fetchWithRetry(WIND_MULTI_MODEL_URL),
-      fetchWithRetry(MARINE_URL)
+      fetchWithRetry(MARINE_URL),
+      fetchWithRetry(RULES_URL).catch(() => fallbackRulesConfig)
     ]);
+    const rulesConfig = fetchedRules || fallbackRulesConfig;
 
     if (!generalData || !generalData.hourly) {
         throw new Error("Invalid API Data");
