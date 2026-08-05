@@ -131,6 +131,10 @@ function evaluateStatus(speed, dir, wave, config) {
   }
 }
 
+function getWindArrowSVG(dir, sizeClass = "w-5 h-5", colorClass = "") {
+  return `<svg class="inline-block ${sizeClass} ${colorClass} transform transition-transform align-middle shrink-0" style="transform: rotate(${dir}deg);" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"></line><polyline points="19 14 12 21 5 14"></polyline></svg>`;
+}
+
 function renderUI(forecast, currentHourReal, isNextDay) {
   let activeForecast = forecast.find(f => f.hour === currentHourReal && !isNextDay);
   if (!activeForecast) activeForecast = forecast[0];
@@ -140,7 +144,14 @@ function renderUI(forecast, currentHourReal, isNextDay) {
   document.getElementById('card-badge').textContent = activeForecast.badge;
   document.getElementById('card-desc').textContent = activeForecast.desc;
   
-  document.getElementById('card-wind').innerHTML = `${activeForecast.adjSpeed} <span class="text-sm font-normal opacity-70 ml-1">km/h</span> <span class="inline-block transform transition-transform ml-2" style="transform: rotate(${activeForecast.dir}deg)">↓</span>`;
+  document.getElementById('card-wind').innerHTML = `
+    <span class="flex items-center gap-1.5">
+      <span>${activeForecast.adjSpeed} <span class="text-sm font-normal opacity-70">km/h</span></span>
+      <span class="inline-flex items-center justify-center p-1 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm shadow-sm" title="Dirección: ${activeForecast.dir}°">
+        ${getWindArrowSVG(activeForecast.dir, "w-6 h-6 sm:w-7 sm:h-7", "text-white")}
+      </span>
+    </span>
+  `;
   document.getElementById('card-wave').textContent = `${activeForecast.wave} m`;
 
   const uvElement = document.getElementById('card-uv');
@@ -166,14 +177,20 @@ function renderUI(forecast, currentHourReal, isNextDay) {
           <div class="flex items-center space-x-1.5 flex-wrap">
             <span class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full" style="background-color: ${item.color}"></span>
             <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">${item.badge}</span>
-            ${isOptimal ? '<span class="text-[9px] sm:text-[10px] bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200 dark:border-amber-800">✨ Óptimo</span>' : ''}
+            ${isOptimal ? '<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200 dark:border-amber-800">✨ Óptimo</span>' : ''}
           </div>
-          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight mt-0.5 sm:mt-1">${item.desc}</p>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
       </div>
-      <div class="text-right text-[11px] sm:text-xs w-1/2">
-        <p class="font-bold text-slate-800 dark:text-slate-200">💨 ${item.adjSpeed} <span class="text-[9px] sm:text-[10px] font-normal text-slate-500 dark:text-slate-400">km/h <span class="inline-block transform transition-transform" style="transform: rotate(${item.dir}deg)">↓</span></span> | 🌊 ${item.wave}m</p>
-        <p class="text-slate-400 dark:text-slate-500 mt-0.5 sm:mt-1">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
+      <div class="text-right text-xs sm:text-sm w-1/2">
+        <div class="font-bold text-slate-800 dark:text-slate-200 flex items-center justify-end gap-1">
+          <span>💨 ${item.adjSpeed} <span class="text-[10px] sm:text-xs font-normal text-slate-500 dark:text-slate-400">km/h</span></span>
+          <span class="inline-flex items-center justify-center p-0.5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 shadow-xs" title="Dirección: ${item.dir}°">
+            ${getWindArrowSVG(item.dir, "w-4 h-4 sm:w-5 sm:h-5")}
+          </span>
+          <span class="ml-1">| 🌊 ${item.wave}m</span>
+        </div>
+        <p class="text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 text-[11px] sm:text-xs">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
       </div>
     `;
     listContainer.appendChild(row);
