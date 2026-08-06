@@ -38,7 +38,7 @@
       "dir_min_deg": 101,
       "dir_max_deg": 135,
       "thresholds": [
-        { "max_speed_kmh": 7.5, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma / Brisa suave" },
+        { "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma / Brisa suave" },
         { "max_speed_kmh": 15,  "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar rizada suave" },
         { "max_speed_kmh": 20,  "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" },
         { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }
@@ -49,7 +49,7 @@
       "dir_min_deg": 0,
       "dir_max_deg": 360,
       "thresholds": [
-        { "max_speed_kmh": 7.5, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa paralela imperceptible" },
+        { "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa paralela imperceptible" },
         { "max_speed_kmh": 15,  "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" },
         { "max_speed_kmh": 22,  "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento lateral moderado" },
         { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento fuerte lateral" }

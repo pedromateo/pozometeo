@@ -15,6 +15,23 @@ let selectedDayIndex = 0; // 0 = Hoy, 1 = Hoy+1, 2 = Hoy+2
 let fetchedApiData = null;
 let currentForecastData = []; 
 let uiTextsConfig = null;
+let currentRulesConfig = null;
+
+const fallbackRulesConfig = {
+  "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
+  "global_wave_rules": [
+    { "max_height_m": 0.3, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar llana / Calma chicha" },
+    { "max_height_m": 0.6, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Oleaje tranquilo" },
+    { "max_height_m": 1.1, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Precaución: Presencia de oleaje" },
+    { "max_height_m": 99.0, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Prohibido / Peligro: Mar de fondo" }
+  ],
+  "rules": [
+    { "id": "offshore", "dir_min_deg": 270, "dir_max_deg": 330, "thresholds": [{ "max_speed_kmh": 10, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano (Terral suave)" }, { "max_speed_kmh": 20, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }, { "max_speed_kmh": 30, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Mar plano pero brisa fuerte de tierra" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento racheado fuerte de tierra" }] },
+    { "id": "perpendicular", "dir_min_deg": 60, "dir_max_deg": 100, "thresholds": [{ "max_speed_kmh": 6, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma chicha" }, { "max_speed_kmh": 12, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }] },
+    { "id": "diagonal", "dir_min_deg": 101, "dir_max_deg": 135, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma / Brisa suave" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar rizada suave" }, { "max_speed_kmh": 20, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }] },
+    { "id": "parallel_or_other", "dir_min_deg": 0, "dir_max_deg": 360, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa paralela imperceptible" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" }, { "max_speed_kmh": 22, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento lateral moderado" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento fuerte lateral" }] }
+  ]
+};
 
 const fallbackUITexts = {
   "header": { "title": "Pozo del Esparto", "location": "📍 Cuevas del Almanzora, Almería", "live_badge": "En Vivo" },
@@ -40,6 +57,64 @@ const fallbackUITexts = {
     "refresh_button": "🔄 Refrescar Datos"
   }
 };
+
+async function loadRules() {
+  const RULES_URL = './beach_rules.json';
+  try {
+    const fetchedRules = await fetchWithRetry(RULES_URL);
+    if (fetchedRules && fetchedRules.rules && fetchedRules.global_wave_rules) {
+      currentRulesConfig = fetchedRules;
+      try {
+        localStorage.setItem('pozometeo_rules', JSON.stringify(fetchedRules));
+      } catch (e) {}
+      return currentRulesConfig;
+    }
+  } catch (err) {
+    console.warn('No se pudo descargar beach_rules.json, buscando en caché local...', err);
+  }
+
+  try {
+    const cached = localStorage.getItem('pozometeo_rules');
+    if (cached) {
+      currentRulesConfig = JSON.parse(cached);
+      return currentRulesConfig;
+    }
+  } catch (e) {}
+
+  currentRulesConfig = fallbackRulesConfig;
+  return currentRulesConfig;
+}
+
+function getRules() {
+  return currentRulesConfig || fallbackRulesConfig;
+}
+
+async function loadUITexts() {
+  const TEXTS_URL = './ui_texts.json';
+  try {
+    const fetchedTexts = await fetchWithRetry(TEXTS_URL);
+    if (fetchedTexts) {
+      uiTextsConfig = fetchedTexts;
+      try {
+        localStorage.setItem('pozometeo_texts', JSON.stringify(fetchedTexts));
+      } catch (e) {}
+      return fetchedTexts;
+    }
+  } catch (err) {
+    console.warn('No se pudo descargar ui_texts.json, buscando en caché local...', err);
+  }
+
+  try {
+    const cached = localStorage.getItem('pozometeo_texts');
+    if (cached) {
+      uiTextsConfig = JSON.parse(cached);
+      return uiTextsConfig;
+    }
+  } catch (e) {}
+
+  uiTextsConfig = fallbackUITexts;
+  return fallbackUITexts;
+}
 
 function applyUITexts(texts) {
   if (!texts) return;
@@ -71,43 +146,44 @@ async function initApp() {
     const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=3&wind_speed_unit=kmh';
     const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height&timezone=Europe/Madrid&forecast_days=3';
 
-    const RULES_URL = './beach_rules.json';
-    const TEXTS_URL = './ui_texts.json';
-
-    const fallbackRulesConfig = {
-      "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
-      "global_wave_rules": [
-        { "max_height_m": 0.3, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar llana / Calma chicha" },
-        { "max_height_m": 0.6, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Oleaje tranquilo" },
-        { "max_height_m": 1.1, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Precaución: Presencia de oleaje" },
-        { "max_height_m": 99.0, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Prohibido / Peligro: Mar de fondo" }
-      ],
-      "rules": [
-        { "id": "offshore", "dir_min_deg": 270, "dir_max_deg": 330, "thresholds": [{ "max_speed_kmh": 10, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano (Terral suave)" }, { "max_speed_kmh": 20, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }, { "max_speed_kmh": 30, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Mar plano pero brisa fuerte de tierra" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento racheado fuerte de tierra" }] },
-        { "id": "perpendicular", "dir_min_deg": 60, "dir_max_deg": 100, "thresholds": [{ "max_speed_kmh": 6, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma chicha" }, { "max_speed_kmh": 12, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }] },
-        { "id": "diagonal", "dir_min_deg": 101, "dir_max_deg": 135, "thresholds": [{ "max_speed_kmh": 7.5, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma / Brisa suave" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar rizada suave" }, { "max_speed_kmh": 20, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }] },
-        { "id": "parallel_or_other", "dir_min_deg": 0, "dir_max_deg": 360, "thresholds": [{ "max_speed_kmh": 7.5, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa paralela imperceptible" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" }, { "max_speed_kmh": 22, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento lateral moderado" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento fuerte lateral" }] }
-      ]
-    };
-
-    const [generalData, windData, marineData, fetchedRules, fetchedTexts] = await Promise.all([
-      fetchWithRetry(GENERAL_URL),
-      fetchWithRetry(WIND_MULTI_MODEL_URL),
-      fetchWithRetry(MARINE_URL),
-      fetchWithRetry(RULES_URL).catch(() => fallbackRulesConfig),
-      fetchWithRetry(TEXTS_URL).catch(() => fallbackUITexts)
+    // Siempre se aseguran y cargan las reglas y textos primero
+    const [rulesConfig, fetchedTexts, generalDataRes, windDataRes, marineDataRes] = await Promise.all([
+      loadRules(),
+      loadUITexts(),
+      fetchWithRetry(GENERAL_URL).catch(() => null),
+      fetchWithRetry(WIND_MULTI_MODEL_URL).catch(() => null),
+      fetchWithRetry(MARINE_URL).catch(() => null)
     ]);
-    const rulesConfig = fetchedRules || fallbackRulesConfig;
-    uiTextsConfig = fetchedTexts || fallbackUITexts;
 
     applyUITexts(uiTextsConfig);
 
-    if (!generalData || !generalData.hourly) {
-        throw new Error("Invalid API Data");
+    let generalData = generalDataRes;
+    let windData = windDataRes;
+    let marineData = marineDataRes;
+
+    if (generalData && windData && marineData) {
+      try {
+        localStorage.setItem('pozometeo_api_cache', JSON.stringify({ generalData, windData, marineData }));
+      } catch (e) {}
+    } else {
+      try {
+        const cachedApi = localStorage.getItem('pozometeo_api_cache');
+        if (cachedApi) {
+          const parsed = JSON.parse(cachedApi);
+          generalData = parsed.generalData;
+          windData = parsed.windData;
+          marineData = parsed.marineData;
+          isOffline = true;
+        }
+      } catch (e) {}
+    }
+
+    if (!generalData || !generalData.hourly || !windData || !windData.hourly || !marineData || !marineData.hourly) {
+      throw new Error("Invalid API Data");
     }
 
     if (isOffline) {
-        document.getElementById('offline-indicator').classList.remove('hidden');
+      document.getElementById('offline-indicator').classList.remove('hidden');
     }
 
     fetchedApiData = { generalData, windData, marineData, rulesConfig };
@@ -135,14 +211,14 @@ function selectDay(dayIndex) {
 
 function getGlobalMaxWind() {
   if (!fetchedApiData) return 20;
-  const { windData, rulesConfig } = fetchedApiData;
-  const factor = rulesConfig.beach_info ? rulesConfig.beach_info.wind_adjustment_factor || 1.125 : 1.125;
+  const rules = fetchedApiData.rulesConfig || getRules();
+  const factor = rules.beach_info ? rules.beach_info.wind_adjustment_factor || 1.125 : 1.125;
   let max = 20;
   for (let i = 0; i < 72; i++) {
     const speeds = [
-      windData.hourly.windspeed_10m_ecmwf_ifs04[i],
-      windData.hourly.windspeed_10m_gfs_seamless[i],
-      windData.hourly.windspeed_10m_icon_seamless[i]
+      fetchedApiData.windData.hourly.windspeed_10m_ecmwf_ifs04[i],
+      fetchedApiData.windData.hourly.windspeed_10m_gfs_seamless[i],
+      fetchedApiData.windData.hourly.windspeed_10m_icon_seamless[i]
     ].filter(v => v !== null && v !== undefined);
     if (speeds.length > 0) {
       const avg = speeds.reduce((a, b) => a + b, 0) / speeds.length;
@@ -156,6 +232,7 @@ function getGlobalMaxWind() {
 function updateDayView(dayIndex) {
   if (!fetchedApiData) return;
   const { generalData, windData, marineData, rulesConfig } = fetchedApiData;
+  const rules = rulesConfig || getRules();
   const currentHourReal = new Date().getHours();
   const dayOffset = dayIndex * 24;
 
@@ -193,7 +270,7 @@ function updateDayView(dayIndex) {
     const finalSpeed = parseFloat(avgSpeed.toFixed(1));
     const finalDir = Math.round(avgDir);
 
-    const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rulesConfig);
+    const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rules);
     hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, ...evalResult });
   }
 
@@ -203,11 +280,12 @@ function updateDayView(dayIndex) {
 }
 
 function evaluateStatus(speed, dir, wave, config) {
-  const adjSpeed = speed * config.beach_info.wind_adjustment_factor;
-  const waveRule = config.global_wave_rules.find(w => wave <= w.max_height_m) || config.global_wave_rules[config.global_wave_rules.length - 1];
+  const rules = config || getRules();
+  const adjSpeed = speed * (rules.beach_info ? rules.beach_info.wind_adjustment_factor : 1.125);
+  const waveRule = rules.global_wave_rules.find(w => wave <= w.max_height_m) || rules.global_wave_rules[rules.global_wave_rules.length - 1];
   
-  let windRule = config.rules.find(r => r.id !== "parallel_or_other" && dir >= r.dir_min_deg && dir <= r.dir_max_deg);
-  if (!windRule) windRule = config.rules.find(r => r.id === "parallel_or_other");
+  let windRule = rules.rules.find(r => r.id !== "parallel_or_other" && dir >= r.dir_min_deg && dir <= r.dir_max_deg);
+  if (!windRule) windRule = rules.rules.find(r => r.id === "parallel_or_other");
   const windThreshold = windRule.thresholds.find(t => adjSpeed <= t.max_speed_kmh) || windRule.thresholds[windRule.thresholds.length - 1];
 
   if (waveRule.level > windThreshold.level) {

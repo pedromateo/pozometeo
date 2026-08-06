@@ -30,7 +30,7 @@ const mockMarine = {
   }
 };
 
-const dom = new JSDOM(html, { runScripts: "outside-only" });
+const dom = new JSDOM(html, { runScripts: "outside-only", url: "http://localhost/" });
 const window = dom.window;
 global.window = window;
 global.document = window.document;
@@ -187,11 +187,32 @@ try {
       failed = true;
     }
 
+    // Test 12: Verify loadRules and getRules availability for predictions without explicit config
+    if (typeof window.getRules === 'function' && typeof window.loadRules === 'function') {
+      const activeRules = window.getRules();
+      const evalWithoutConfig = window.evaluateStatus(12, 90, 0.2); // No config argument passed
+      if (activeRules && activeRules.rules && evalWithoutConfig && evalWithoutConfig.badge) {
+        console.log(`✅ TEST 12 PASADO: Fichero de reglas siempre disponible y funcional en evaluateStatus() sin pasar configuración explícita -> Badge: "${evalWithoutConfig.badge}".`);
+      } else {
+        console.error('❌ TEST 12 FALLADO: Las reglas no se cargaron correctamente o evaluateStatus sin config falló.');
+        failed = true;
+      }
+    }
+
+    // Test 13: Verify localStorage cache persistence for rules
+    const cachedRulesStr = window.localStorage.getItem('pozometeo_rules');
+    if (cachedRulesStr && JSON.parse(cachedRulesStr).beach_info) {
+      console.log('✅ TEST 13 PASADO: Fichero de reglas guardado correctamente en localStorage (pozometeo_rules) para disponibilidad offline total.');
+    } else {
+      console.error('❌ TEST 13 FALLADO: Las reglas no se guardaron en localStorage.');
+      failed = true;
+    }
+
     if (failed) {
       console.error('\n💥 Suite de pruebas FINALIZADA CON ERRORES.');
       process.exit(1);
     } else {
-      console.log('\n🎉 TODAS LAS PRUEBAS (11/11) HAN PASADO CON ÉXITO.');
+      console.log('\n🎉 TODAS LAS PRUEBAS (13/13) HAN PASADO CON ÉXITO.');
       process.exit(0);
     }
   }, 800);
