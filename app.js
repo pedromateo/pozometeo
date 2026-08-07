@@ -367,18 +367,21 @@ function renderUI(forecast, currentHourReal, dayIndex) {
           <p class="text-xs sm:text-sm text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
       </div>
-      <div class="text-right text-xs sm:text-sm w-1/2 flex flex-col items-end justify-center space-y-0.5">
-        <div class="w-full font-bold text-slate-800 flex items-center justify-end gap-1.5">
-          <span>💨</span>
+      <div class="text-right text-xs sm:text-sm w-1/2 flex flex-col items-end justify-center space-y-1">
+        <div class="w-full flex items-center justify-end gap-1.5 font-bold text-slate-800">
           <span style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 9999px; background-color: rgba(0, 114, 206, 0.15); color: #0072ce;" title="Dirección del viento: ${item.dir}°">
             ${getWindArrowSVG(item.dir, 14, "#0072ce")}
           </span>
-          <span>${item.adjSpeed} <span class="text-[10px] sm:text-xs font-normal text-slate-500">km/h</span></span>
+          <span class="ml-1">${item.adjSpeed} <span class="text-[10px] sm:text-xs font-normal text-slate-500">km/h</span></span>
         </div>
-        <div class="w-full font-bold text-slate-800 text-xs sm:text-sm text-right">
-          🌊 ${item.wave} m
+        <div class="w-full flex items-center justify-end gap-1.5 font-bold text-slate-800 text-xs sm:text-sm">
+          <span>🌊</span>
+          <span>${item.wave} m</span>
         </div>
-        <p class="w-full text-slate-500 text-[11px] sm:text-xs text-right">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
+        <div class="w-full flex items-center justify-end gap-1.5 text-slate-500 text-[11px] sm:text-xs">
+          <span>🌡️</span>
+          <span>${item.temp}°C | UV: ${Math.round(item.uv)}</span>
+        </div>
       </div>
     `;
     listContainer.appendChild(row);
