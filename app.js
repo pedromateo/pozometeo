@@ -357,12 +357,12 @@ function renderUI(forecast, currentHourReal, dayIndex) {
     row.innerHTML = `
       <div class="flex items-center space-x-3 sm:space-x-4 w-1/2">
         <div class="flex flex-col items-center">
-          <span class="text-xs sm:text-sm font-bold text-slate-700">${String(item.hour).padStart(2, '0')}:00</span>
+          <span class="text-sm sm:text-base font-bold text-slate-700">${String(item.hour).padStart(2, '0')}:00</span>
         </div>
         <div>
           <div class="flex items-center space-x-1.5 flex-wrap">
-            <span class="text-xs sm:text-sm font-bold text-slate-900">${item.badge}</span>
-            ${isOptimal ? `<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">${texts.hourly_section.optimal_badge}</span>` : ''}
+            <span class="text-sm sm:text-base font-bold text-slate-900">${item.badge}</span>
+            ${isOptimal ? `<span class="text-xs sm:text-sm bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">${texts.hourly_section.optimal_badge}</span>` : ''}
           </div>
           <p class="text-sm sm:text-base text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
