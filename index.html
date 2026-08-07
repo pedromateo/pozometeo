@@ -14,7 +14,21 @@
   
   <script>
     if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(e => console.warn('SW falló:', e)));
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          reg.update();
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              };
+            }
+          };
+        }).catch(e => console.warn('SW falló:', e));
+      });
     } else if (window.location.protocol === 'file:') {
       console.warn('PWA y Service Worker desactivados en local (file://). Usa un servidor local para probarlos.');
     }

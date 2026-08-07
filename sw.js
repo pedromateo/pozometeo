@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pozo-bano-v3.10-static';
+const CACHE_NAME = 'pozo-bano-v3.11-static';
 const DATA_CACHE_NAME = 'pozo-bano-v3-data';
 const ASSETS = [
   './', 
@@ -48,11 +48,22 @@ self.addEventListener('fetch', event => {
       })
     );
   } else {
-    // Estrategia Cache-First para los assets estáticos
+    // Estrategia Network-First para assets estáticos con fallback a caché (Offline)
     event.respondWith(
-      caches.match(event.request).then(response => {
-        return response || fetch(event.request);
-      })
+      fetch(event.request)
+        .then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Si la red falla (Offline), sirve el recurso guardado en caché local
+          return caches.match(event.request);
+        })
     );
   }
 });
