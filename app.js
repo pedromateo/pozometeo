@@ -364,7 +364,7 @@ function renderUI(forecast, currentHourReal, dayIndex) {
             <span class="text-xs sm:text-sm font-bold text-slate-900">${item.badge}</span>
             ${isOptimal ? `<span class="text-[10px] sm:text-[11px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-sm mt-0.5 border border-amber-200">${texts.hourly_section.optimal_badge}</span>` : ''}
           </div>
-          <p class="text-xs sm:text-sm text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
+          <p class="text-sm sm:text-base text-slate-600 font-medium leading-normal mt-0.5 sm:mt-1">${item.desc}</p>
         </div>
       </div>
       <div class="text-right text-xs sm:text-sm w-1/2 flex flex-col items-end justify-center space-y-1">
