@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "Estado del Baño - Pozo del Esparto",
   "scripts": {
+    "start": "python3 -m http.server 8080",
     "test": "node test.js"
   },
   "dependencies": {
