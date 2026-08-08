@@ -20,16 +20,16 @@ let currentRulesConfig = null;
 const fallbackRulesConfig = {
   "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
   "global_wave_rules": [
-    { "max_height_m": 0.3, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar llana / Calma chicha" },
+    { "max_height_m": 0.3, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Calma chicha" },
     { "max_height_m": 0.6, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Oleaje tranquilo" },
-    { "max_height_m": 1.1, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Precaución: Presencia de oleaje" },
+    { "max_height_m": 1.1, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Precaución: Oleaje" },
     { "max_height_m": 99.0, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Prohibido / Peligro: Mar de fondo" }
   ],
   "rules": [
-    { "id": "offshore", "dir_min_deg": 270, "dir_max_deg": 330, "thresholds": [{ "max_speed_kmh": 10, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano (Terral suave)" }, { "max_speed_kmh": 20, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }, { "max_speed_kmh": 30, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Mar plano pero brisa fuerte de tierra" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento racheado fuerte de tierra" }] },
-    { "id": "perpendicular", "dir_min_deg": 60, "dir_max_deg": 100, "thresholds": [{ "max_speed_kmh": 6, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma chicha" }, { "max_speed_kmh": 12, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }] },
-    { "id": "diagonal", "dir_min_deg": 101, "dir_max_deg": 135, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma / Brisa suave" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar rizada suave" }, { "max_speed_kmh": 20, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa diagonal tolerable" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }] },
-    { "id": "parallel_or_other", "dir_min_deg": 0, "dir_max_deg": 360, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa paralela imperceptible" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" }, { "max_speed_kmh": 22, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento lateral moderado" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento fuerte lateral" }] }
+    { "id": "offshore", "dir_min_deg": 270, "dir_max_deg": 330, "thresholds": [{ "max_speed_kmh": 10, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar plano" }, { "max_speed_kmh": 20, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar plano (Viento de tierra)" }, { "max_speed_kmh": 30, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Mar plano pero brisa fuerte de tierra" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento racheado fuerte de tierra" }] },
+    { "id": "perpendicular", "dir_min_deg": 60, "dir_max_deg": 100, "thresholds": [{ "max_speed_kmh": 6, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Calma chicha" }, { "max_speed_kmh": 12, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 16, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }] },
+    { "id": "diagonal", "dir_min_deg": 101, "dir_max_deg": 135, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar rizada suave" }, { "max_speed_kmh": 20, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Brisa tolerable" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Marejadilla molesta" }] },
+    { "id": "parallel_or_other", "dir_min_deg": 0, "dir_max_deg": 360, "thresholds": [{ "max_speed_kmh": 7, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Brisa imperceptible" }, { "max_speed_kmh": 15, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Brisa paralela" }, { "max_speed_kmh": 22, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Viento moderado" }, { "max_speed_kmh": 999, "level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Viento fuerte" }] }
   ]
 };
 
@@ -434,5 +434,33 @@ window.addEventListener('offline', () => {
         document.getElementById('offline-indicator').classList.remove('hidden');
     }
 });
+
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 40; // px
+
+window.addEventListener('touchstart', (e) => {
+  if (e.changedTouches && e.changedTouches.length > 0) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+  if (!e.changedTouches || e.changedTouches.length === 0) return;
+  const touchEndX = e.changedTouches[0].screenX;
+  const touchEndY = e.changedTouches[0].screenY;
+  
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+    if (deltaX < 0) {
+      if (selectedDayIndex < 2) selectDay(selectedDayIndex + 1);
+    } else {
+      if (selectedDayIndex > 0) selectDay(selectedDayIndex - 1);
+    }
+  }
+}, { passive: true });
 
 window.addEventListener('DOMContentLoaded', initApp);

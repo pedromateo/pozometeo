@@ -218,11 +218,47 @@ try {
       failed = true;
     }
 
+    // Test 15: Verify swipe gestures for day navigation
+    window.selectDay(0); // Reset to today
+    const dispatchSwipe = (deltaX, deltaY) => {
+      const touchStart = window.document.createEvent('Event');
+      touchStart.initEvent('touchstart', true, true);
+      touchStart.changedTouches = [{ screenX: 100, screenY: 100 }];
+      window.dispatchEvent(touchStart);
+      
+      const touchEnd = window.document.createEvent('Event');
+      touchEnd.initEvent('touchend', true, true);
+      touchEnd.changedTouches = [{ screenX: 100 + deltaX, screenY: 100 + deltaY }];
+      window.dispatchEvent(touchEnd);
+    };
+
+    dispatchSwipe(-100, 0); // Swipe left
+    const swipeLeftSuccess = document.getElementById('btn-day-1').className.includes('bg-[#0072ce]');
+    
+    dispatchSwipe(-100, 0); // Swipe left again to day 2
+    const swipeLeft2Success = document.getElementById('btn-day-2').className.includes('bg-[#0072ce]');
+    
+    dispatchSwipe(-100, 0); // Swipe left again, should stay on day 2
+    const overSwipeLeftSuccess = document.getElementById('btn-day-2').className.includes('bg-[#0072ce]');
+
+    dispatchSwipe(100, 0); // Swipe right to day 1
+    const swipeRightSuccess = document.getElementById('btn-day-1').className.includes('bg-[#0072ce]');
+
+    dispatchSwipe(10, 100); // Vertical scroll down, should ignore
+    const ignoreVerticalScrollSuccess = document.getElementById('btn-day-1').className.includes('bg-[#0072ce]');
+
+    if (swipeLeftSuccess && swipeLeft2Success && overSwipeLeftSuccess && swipeRightSuccess && ignoreVerticalScrollSuccess) {
+      console.log('✅ TEST 15 PASADO: Navegación por gestos Swipe Left y Swipe Right validada correctamente.');
+    } else {
+      console.error('❌ TEST 15 FALLADO: Error en la navegación por swipe.', { swipeLeftSuccess, swipeLeft2Success, overSwipeLeftSuccess, swipeRightSuccess, ignoreVerticalScrollSuccess });
+      failed = true;
+    }
+
     if (failed) {
       console.error('\n💥 Suite de pruebas FINALIZADA CON ERRORES.');
       process.exit(1);
     } else {
-      console.log('\n🎉 TODAS LAS PRUEBAS (14/14) HAN PASADO CON ÉXITO.');
+      console.log('\n🎉 TODAS LAS PRUEBAS (15/15) HAN PASADO CON ÉXITO.');
       process.exit(0);
     }
   }, 800);
