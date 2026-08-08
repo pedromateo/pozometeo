@@ -144,7 +144,7 @@ async function initApp() {
   try {
     const GENERAL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=temperature_2m,precipitation_probability,uv_index&timezone=Europe/Madrid&forecast_days=3';
     const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=3&wind_speed_unit=kmh';
-    const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height&timezone=Europe/Madrid&forecast_days=3';
+    const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height,sea_surface_temperature&timezone=Europe/Madrid&forecast_days=3';
 
     // Siempre se aseguran y cargan las reglas y textos primero
     const [rulesConfig, fetchedTexts, generalDataRes, windDataRes, marineDataRes] = await Promise.all([
@@ -266,12 +266,13 @@ function updateDayView(dayIndex) {
     const rain = generalData.hourly.precipitation_probability[apiIndex] || 0;
     const uv = generalData.hourly.uv_index[apiIndex] || 0;
     const wave = marineData.hourly.wave_height[apiIndex] || 0;
+    const waterTemp = marineData.hourly.sea_surface_temperature && marineData.hourly.sea_surface_temperature[apiIndex] !== undefined ? marineData.hourly.sea_surface_temperature[apiIndex] : null;
 
     const finalSpeed = parseFloat(avgSpeed.toFixed(1));
     const finalDir = Math.round(avgDir);
 
     const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rules);
-    hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, ...evalResult });
+    hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, waterTemp, ...evalResult });
   }
 
   currentForecastData = hourlyForecast;
@@ -320,7 +321,8 @@ function renderUI(forecast, currentHourReal, dayIndex) {
       </span>
     </span>
   `;
-  document.getElementById('card-wave').textContent = `${activeForecast.wave} m`;
+  const waterTempHtml = activeForecast.waterTemp != null ? ` <span class="font-normal opacity-90">| ${activeForecast.waterTemp.toFixed(1)}°C</span>` : '';
+  document.getElementById('card-wave').innerHTML = `${activeForecast.wave} m${waterTempHtml}`;
 
   const uvElement = document.getElementById('card-uv');
   uvElement.textContent = `${texts.main_card.uv_prefix} ${Math.round(activeForecast.uv)}`;
@@ -375,9 +377,9 @@ function renderUI(forecast, currentHourReal, dayIndex) {
           <span class="align-middle">${item.adjSpeed} <span class="text-xs sm:text-sm font-normal text-slate-500">km/h</span></span>
         </div>
         <div class="w-full text-right font-bold text-slate-800 text-sm sm:text-base">
-          🌊 ${item.wave} m
+          🌊 ${item.wave} m${item.waterTemp != null ? ` <span class="font-normal text-slate-500">| ${item.waterTemp.toFixed(1)}°C</span>` : ''}
         </div>
-        <p class="w-full text-right text-slate-500 text-xs sm:text-sm">🌡️ ${item.temp}°C | UV: ${Math.round(item.uv)}</p>
+        <p class="w-full text-right text-slate-500 text-xs sm:text-sm">🌡️ <span class="font-bold text-slate-700">${item.temp}°C</span> | UV: ${Math.round(item.uv)}</p>
       </div>
     `;
     listContainer.appendChild(row);

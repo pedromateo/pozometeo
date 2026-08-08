@@ -26,7 +26,8 @@ const mockWind = {
 };
 const mockMarine = {
   hourly: {
-    wave_height: Array(100).fill(0.5)
+    wave_height: Array(100).fill(0.5),
+    sea_surface_temperature: Array(100).fill(24.3)
   }
 };
 
@@ -208,11 +209,20 @@ try {
       failed = true;
     }
 
+    // Test 14: Verify water temperature is rendered in main card-wave
+    const cardWave = document.getElementById('card-wave');
+    if (cardWave && cardWave.textContent.includes('24.3°C')) {
+      console.log('✅ TEST 14 PASADO: Temperatura del agua (24.3°C) renderizada correctamente junto a la altura de olas.');
+    } else {
+      console.error('❌ TEST 14 FALLADO: Temperatura del agua no encontrada en card-wave:', cardWave ? cardWave.textContent : null);
+      failed = true;
+    }
+
     if (failed) {
       console.error('\n💥 Suite de pruebas FINALIZADA CON ERRORES.');
       process.exit(1);
     } else {
-      console.log('\n🎉 TODAS LAS PRUEBAS (13/13) HAN PASADO CON ÉXITO.');
+      console.log('\n🎉 TODAS LAS PRUEBAS (14/14) HAN PASADO CON ÉXITO.');
       process.exit(0);
     }
   }, 800);
