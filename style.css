@@ -36,3 +36,60 @@
 .hover\:text-slate-900:hover {
   color: #0f172a;
 }
+
+/* Swipe & Day Transition Visual Effects */
+.swipe-transition {
+  will-change: transform, opacity;
+}
+
+@keyframes slideFromRight {
+  0% {
+    transform: translateX(35px);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideFromLeft {
+  0% {
+    transform: translateX(-35px);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bounceRubberBandRight {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(18px); }
+  70% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes bounceRubberBandLeft {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(-18px); }
+  70% { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-slide-from-right {
+  animation: slideFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-from-left {
+  animation: slideFromLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-bounce-right {
+  animation: bounceRubberBandRight 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.animate-bounce-left {
+  animation: bounceRubberBandLeft 0.38s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}

@@ -202,8 +202,41 @@ async function initApp() {
   }
 }
 
-function selectDay(dayIndex) {
+function triggerSwipeAnimation(direction) {
+  const container = document.getElementById('swipe-container');
+  if (!container) return;
+  
+  container.classList.remove('animate-slide-from-right', 'animate-slide-from-left', 'animate-bounce-right', 'animate-bounce-left');
+  container.style.transform = '';
+  container.style.opacity = '';
+  
+  void container.offsetWidth;
+  
+  if (direction === 'left') {
+    container.classList.add('animate-slide-from-right');
+  } else if (direction === 'right') {
+    container.classList.add('animate-slide-from-left');
+  } else if (direction === 'bounce-left') {
+    container.classList.add('animate-bounce-left');
+  } else if (direction === 'bounce-right') {
+    container.classList.add('animate-bounce-right');
+  }
+
+  setTimeout(() => {
+    if (container) {
+      container.classList.remove('animate-slide-from-right', 'animate-slide-from-left', 'animate-bounce-right', 'animate-bounce-left');
+    }
+  }, 400);
+}
+
+function selectDay(dayIndex, forcedDirection = null) {
+  if (dayIndex === selectedDayIndex && !forcedDirection) return;
+
+  const direction = forcedDirection || (dayIndex > selectedDayIndex ? 'left' : 'right');
   selectedDayIndex = dayIndex;
+
+  triggerSwipeAnimation(direction);
+
   if (fetchedApiData) {
     updateDayView(selectedDayIndex);
   } else {
@@ -440,28 +473,76 @@ window.addEventListener('offline', () => {
 
 let touchStartX = 0;
 let touchStartY = 0;
+let isTouchDragging = false;
 const SWIPE_THRESHOLD = 40; // px
 
 window.addEventListener('touchstart', (e) => {
-  if (e.changedTouches && e.changedTouches.length > 0) {
-    touchStartX = e.changedTouches[0].screenX;
-    touchStartY = e.changedTouches[0].screenY;
+  const touchObj = (e.touches && e.touches.length > 0) ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0 ? e.changedTouches[0] : null);
+  if (touchObj) {
+    touchStartX = touchObj.screenX;
+    touchStartY = touchObj.screenY;
+    isTouchDragging = false;
+    
+    const container = document.getElementById('swipe-container');
+    if (container) {
+      container.classList.remove('animate-slide-from-right', 'animate-slide-from-left', 'animate-bounce-right', 'animate-bounce-left');
+      container.style.transition = 'none';
+    }
+  }
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+  if (!e.touches || e.touches.length === 0) return;
+  const currentX = e.touches[0].screenX;
+  const currentY = e.touches[0].screenY;
+  
+  const deltaX = currentX - touchStartX;
+  const deltaY = currentY - touchStartY;
+
+  if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+    isTouchDragging = true;
+    const container = document.getElementById('swipe-container');
+    if (container) {
+      let offset = deltaX * 0.35;
+      if ((selectedDayIndex === 0 && deltaX > 0) || (selectedDayIndex === 2 && deltaX < 0)) {
+        offset = deltaX * 0.12;
+      }
+      container.style.transform = `translateX(${offset}px)`;
+      container.style.opacity = `${Math.max(0.6, 1 - Math.abs(offset) / 350)}`;
+    }
   }
 }, { passive: true });
 
 window.addEventListener('touchend', (e) => {
-  if (!e.changedTouches || e.changedTouches.length === 0) return;
-  const touchEndX = e.changedTouches[0].screenX;
-  const touchEndY = e.changedTouches[0].screenY;
+  const container = document.getElementById('swipe-container');
+  if (container) {
+    container.style.transition = '';
+    container.style.transform = '';
+    container.style.opacity = '';
+  }
+
+  const touchObj = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : null;
+  if (!touchObj) return;
+
+  const touchEndX = touchObj.screenX;
+  const touchEndY = touchObj.screenY;
   
   const deltaX = touchEndX - touchStartX;
   const deltaY = touchEndY - touchStartY;
   
   if (Math.abs(deltaX) > SWIPE_THRESHOLD && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
     if (deltaX < 0) {
-      if (selectedDayIndex < 2) selectDay(selectedDayIndex + 1);
+      if (selectedDayIndex < 2) {
+        selectDay(selectedDayIndex + 1, 'left');
+      } else {
+        triggerSwipeAnimation('bounce-left');
+      }
     } else {
-      if (selectedDayIndex > 0) selectDay(selectedDayIndex - 1);
+      if (selectedDayIndex > 0) {
+        selectDay(selectedDayIndex - 1, 'right');
+      } else {
+        triggerSwipeAnimation('bounce-right');
+      }
     }
   }
 }, { passive: true });
