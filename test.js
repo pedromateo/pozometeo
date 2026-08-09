@@ -209,12 +209,16 @@ try {
       failed = true;
     }
 
-    // Test 14: Verify water temperature is rendered in main card-wave
-    const cardWave = document.getElementById('card-wave');
-    if (cardWave && cardWave.textContent.includes('24.3°C')) {
-      console.log('✅ TEST 14 PASADO: Temperatura del agua (24.3°C) renderizada correctamente junto a la altura de olas.');
+    // Test 14: Verify ambient and water temperature cards in main status card
+    const cardTemp = document.getElementById('card-temp');
+    const cardWaterTemp = document.getElementById('card-water-temp');
+    if (cardTemp && cardTemp.textContent.includes('25°C') && cardWaterTemp && cardWaterTemp.textContent.includes('24.3°C')) {
+      console.log('✅ TEST 14 PASADO: Cuadros de temperatura ambiente (25°C) y temperatura del agua (24.3°C) renderizados correctamente.');
     } else {
-      console.error('❌ TEST 14 FALLADO: Temperatura del agua no encontrada en card-wave:', cardWave ? cardWave.textContent : null);
+      console.error('❌ TEST 14 FALLADO: Temperatura ambiente o del agua no encontrada en las tarjetas principales:', {
+        temp: cardTemp ? cardTemp.textContent : null,
+        waterTemp: cardWaterTemp ? cardWaterTemp.textContent : null
+      });
       failed = true;
     }
 

@@ -21,6 +21,8 @@
     "uv_prefix": "☀️ UV:",
     "wind_label": "💨 Viento (Orilla)",
     "wave_label": "🌊 Oleaje",
+    "temp_label": "🌡️ Temp. Ambiente",
+    "water_temp_label": "🏊 Temp. Agua",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
   "day_selector": {

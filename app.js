@@ -48,6 +48,8 @@ const fallbackUITexts = {
     "uv_prefix": "☀️ UV:",
     "wind_label": "💨 Viento (Orilla)",
     "wave_label": "🌊 Oleaje",
+    "temp_label": "🌡️ Temp. Ambiente",
+    "water_temp_label": "🏊 Temp. Agua",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
   "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
@@ -321,8 +323,9 @@ function renderUI(forecast, currentHourReal, dayIndex) {
       </span>
     </span>
   `;
-  const waterTempHtml = activeForecast.waterTemp != null ? ` <span class="font-normal opacity-90">| ${activeForecast.waterTemp.toFixed(1)}°C</span>` : '';
-  document.getElementById('card-wave').innerHTML = `${activeForecast.wave} m${waterTempHtml}`;
+  document.getElementById('card-wave').textContent = `${activeForecast.wave} m`;
+  document.getElementById('card-temp').textContent = activeForecast.temp != null ? `${activeForecast.temp}°C` : '-- °C';
+  document.getElementById('card-water-temp').textContent = activeForecast.waterTemp != null ? `${activeForecast.waterTemp.toFixed(1)}°C` : '-- °C';
 
   const uvElement = document.getElementById('card-uv');
   uvElement.textContent = `${texts.main_card.uv_prefix} ${Math.round(activeForecast.uv)}`;
