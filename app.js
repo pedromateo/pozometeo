@@ -52,7 +52,7 @@ const fallbackUITexts = {
   },
   "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
   "hourly_section": {
-    "title": "Evolución (08:00 - 20:00)",
+    "title": "Evolución (08:00 - 23:00)",
     "optimal_badge": "✨ Óptimo",
     "refresh_button": "🔄 Refrescar Datos"
   }
@@ -237,7 +237,7 @@ function updateDayView(dayIndex) {
   const dayOffset = dayIndex * 24;
 
   const hourlyForecast = [];
-  for (let h = 8; h <= 20; h++) {
+  for (let h = 8; h <= 23; h++) {
     const apiIndex = dayOffset + h;
     
     const speeds = [
@@ -309,7 +309,7 @@ function renderUI(forecast, currentHourReal, dayIndex) {
   if (!activeForecast) activeForecast = forecast[0];
 
   document.getElementById('main-status-card').style.backgroundColor = activeForecast.color;
-  document.getElementById('card-time').textContent = isToday && currentHourReal >= 8 && currentHourReal <= 20 ? texts.main_card.now_label : `${texts.main_card.forecast_prefix} ${activeForecast.hour}:00h`;
+  document.getElementById('card-time').textContent = isToday && currentHourReal >= 8 && currentHourReal <= 23 ? texts.main_card.now_label : `${texts.main_card.forecast_prefix} ${activeForecast.hour}:00h`;
   document.getElementById('card-badge').textContent = activeForecast.badge;
   document.getElementById('card-desc').textContent = activeForecast.desc;
   

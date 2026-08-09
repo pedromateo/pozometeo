@@ -74,10 +74,10 @@ try {
 
     // Test 1: Hourly list length
     const list = document.getElementById('hourly-list');
-    if (list && list.children.length === 13) {
-      console.log('✅ TEST 1 PASADO: Lista horaria generada correctamente (13 tramos de 08:00 a 20:00).');
+    if (list && list.children.length === 16) {
+      console.log('✅ TEST 1 PASADO: Lista horaria generada correctamente (16 tramos de 08:00 a 23:00).');
     } else {
-      console.error('❌ TEST 1 FALLADO: Elementos esperados 13, encontrados:', list ? list.children.length : 0);
+      console.error('❌ TEST 1 FALLADO: Elementos esperados 16, encontrados:', list ? list.children.length : 0);
       failed = true;
     }
 
@@ -93,8 +93,8 @@ try {
 
     // Test 3: Hourly List SVG Wind Arrows
     const hourlySvgs = list ? list.querySelectorAll('svg') : [];
-    if (hourlySvgs.length === 13) {
-      console.log('✅ TEST 3 PASADO: Flechas SVG de viento presentes en cada fila horaria (13/13).');
+    if (hourlySvgs.length === 16) {
+      console.log('✅ TEST 3 PASADO: Flechas SVG de viento presentes en cada fila horaria (16/16).');
     } else {
       console.error('❌ TEST 3 FALLADO: Flechas SVG en la lista horaria:', hourlySvgs.length);
       failed = true;

@@ -29,7 +29,7 @@
     "day_2": "Hoy+2"
   },
   "hourly_section": {
-    "title": "Evolución (08:00 - 20:00)",
+    "title": "Evolución (08:00 - 23:00)",
     "optimal_badge": "✨ Óptimo",
     "refresh_button": "🔄 Refrescar Datos"
   }
