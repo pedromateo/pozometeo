@@ -23,10 +23,11 @@
     "wave_label": "🌊 Oleaje",
     "temp_label": "🌡️ Temp. Ambiente",
     "water_temp_label": "🏊 Temp. Agua",
+    "gusts_label": "Rachas",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
   "day_selector": {
-    "day_0": "HOY",
+    "day_0": "Hoy",
     "day_1": "Hoy+1",
     "day_2": "Hoy+2"
   },

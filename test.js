@@ -18,10 +18,13 @@ const mockWind = {
   hourly: {
     windspeed_10m_ecmwf_ifs04: Array(100).fill(15),
     winddirection_10m_ecmwf_ifs04: Array(100).fill(90),
+    windgusts_10m_ecmwf_ifs04: Array(100).fill(22),
     windspeed_10m_gfs_seamless: Array(100).fill(16),
     winddirection_10m_gfs_seamless: Array(100).fill(95),
+    windgusts_10m_gfs_seamless: Array(100).fill(24),
     windspeed_10m_icon_seamless: Array(100).fill(14),
     winddirection_10m_icon_seamless: Array(100).fill(85),
+    windgusts_10m_icon_seamless: Array(100).fill(20),
   }
 };
 const mockMarine = {
@@ -258,11 +261,21 @@ try {
       failed = true;
     }
 
+    // Test 16: Verify wind gusts in hourly evolution list and absent from main card
+    const cardWindText = cardWind ? cardWind.textContent : '';
+    const firstRowText = list && list.children[0] ? list.children[0].textContent : '';
+    if (!cardWindText.includes('|') && firstRowText.includes('| 24.8 km/h')) {
+      console.log('✅ TEST 16 PASADO: Dato de velocidad de rachas de viento presente en la lista por horas y excluido de la tarjeta principal.');
+    } else {
+      console.error('❌ TEST 16 FALLADO: Comprobación de rachas fallida:', { cardWindText, firstRowText });
+      failed = true;
+    }
+
     if (failed) {
       console.error('\n💥 Suite de pruebas FINALIZADA CON ERRORES.');
       process.exit(1);
     } else {
-      console.log('\n🎉 TODAS LAS PRUEBAS (15/15) HAN PASADO CON ÉXITO.');
+      console.log('\n🎉 TODAS LAS PRUEBAS (16/16) HAN PASADO CON ÉXITO.');
       process.exit(0);
     }
   }, 800);

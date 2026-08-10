@@ -50,9 +50,10 @@ const fallbackUITexts = {
     "wave_label": "🌊 Oleaje",
     "temp_label": "🌡️ Temp. Ambiente",
     "water_temp_label": "🏊 Temp. Agua",
+    "gusts_label": "Rachas",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
-  "day_selector": { "day_0": "HOY", "day_1": "Hoy+1", "day_2": "Hoy+2" },
+  "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
   "hourly_section": {
     "title": "Evolución (08:00 - 23:00)",
     "optimal_badge": "✨ Óptimo",
@@ -145,7 +146,7 @@ async function initApp() {
 
   try {
     const GENERAL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=temperature_2m,precipitation_probability,uv_index&timezone=Europe/Madrid&forecast_days=3';
-    const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=3&wind_speed_unit=kmh';
+    const WIND_MULTI_MODEL_URL = 'https://api.open-meteo.com/v1/forecast?latitude=37.245&longitude=-1.862&hourly=windspeed_10m,winddirection_10m,windgusts_10m&models=ecmwf_ifs04,gfs_seamless,icon_seamless&timezone=Europe/Madrid&forecast_days=3&wind_speed_unit=kmh';
     const MARINE_URL = 'https://marine-api.open-meteo.com/v1/marine?latitude=37.245&longitude=-1.862&hourly=wave_height,sea_surface_temperature&timezone=Europe/Madrid&forecast_days=3';
 
     // Siempre se aseguran y cargan las reglas y textos primero
@@ -276,18 +277,25 @@ function updateDayView(dayIndex) {
     const apiIndex = dayOffset + h;
     
     const speeds = [
-      windData.hourly.windspeed_10m_ecmwf_ifs04[apiIndex],
-      windData.hourly.windspeed_10m_gfs_seamless[apiIndex],
-      windData.hourly.windspeed_10m_icon_seamless[apiIndex]
+      windData.hourly.windspeed_10m_ecmwf_ifs04 ? windData.hourly.windspeed_10m_ecmwf_ifs04[apiIndex] : undefined,
+      windData.hourly.windspeed_10m_gfs_seamless ? windData.hourly.windspeed_10m_gfs_seamless[apiIndex] : undefined,
+      windData.hourly.windspeed_10m_icon_seamless ? windData.hourly.windspeed_10m_icon_seamless[apiIndex] : undefined
+    ].filter(v => v !== null && v !== undefined);
+
+    const gusts = [
+      windData.hourly.windgusts_10m_ecmwf_ifs04 ? windData.hourly.windgusts_10m_ecmwf_ifs04[apiIndex] : undefined,
+      windData.hourly.windgusts_10m_gfs_seamless ? windData.hourly.windgusts_10m_gfs_seamless[apiIndex] : undefined,
+      windData.hourly.windgusts_10m_icon_seamless ? windData.hourly.windgusts_10m_icon_seamless[apiIndex] : undefined
     ].filter(v => v !== null && v !== undefined);
 
     const dirs = [
-      windData.hourly.winddirection_10m_ecmwf_ifs04[apiIndex],
-      windData.hourly.winddirection_10m_gfs_seamless[apiIndex],
-      windData.hourly.winddirection_10m_icon_seamless[apiIndex]
+      windData.hourly.winddirection_10m_ecmwf_ifs04 ? windData.hourly.winddirection_10m_ecmwf_ifs04[apiIndex] : undefined,
+      windData.hourly.winddirection_10m_gfs_seamless ? windData.hourly.winddirection_10m_gfs_seamless[apiIndex] : undefined,
+      windData.hourly.winddirection_10m_icon_seamless ? windData.hourly.winddirection_10m_icon_seamless[apiIndex] : undefined
     ].filter(v => v !== null && v !== undefined);
 
     const avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+    const avgGust = gusts.length > 0 ? gusts.reduce((a, b) => a + b, 0) / gusts.length : null;
 
     let sumSin = 0, sumCos = 0;
     dirs.forEach(d => {
@@ -304,10 +312,11 @@ function updateDayView(dayIndex) {
     const waterTemp = marineData.hourly.sea_surface_temperature && marineData.hourly.sea_surface_temperature[apiIndex] !== undefined ? marineData.hourly.sea_surface_temperature[apiIndex] : null;
 
     const finalSpeed = parseFloat(avgSpeed.toFixed(1));
+    const finalGust = avgGust != null ? parseFloat(avgGust.toFixed(1)) : null;
     const finalDir = Math.round(avgDir);
 
-    const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rules);
-    hourlyForecast.push({ hour: h, speed: finalSpeed, dir: finalDir, temp, rain, uv, wave, waterTemp, ...evalResult });
+    const evalResult = evaluateStatus(finalSpeed, finalDir, wave, rules, finalGust);
+    hourlyForecast.push({ hour: h, speed: finalSpeed, gust: finalGust, dir: finalDir, temp, rain, uv, wave, waterTemp, ...evalResult });
   }
 
   currentForecastData = hourlyForecast;
@@ -315,9 +324,11 @@ function updateDayView(dayIndex) {
   drawSparkline(currentForecastData, getGlobalMaxWind());
 }
 
-function evaluateStatus(speed, dir, wave, config) {
+function evaluateStatus(speed, dir, wave, config, gust = null) {
   const rules = config || getRules();
-  const adjSpeed = speed * (rules.beach_info ? rules.beach_info.wind_adjustment_factor : 1.125);
+  const factor = rules.beach_info ? rules.beach_info.wind_adjustment_factor : 1.125;
+  const adjSpeed = speed * factor;
+  const adjGust = gust != null ? parseFloat((gust * factor).toFixed(1)) : null;
   const waveRule = rules.global_wave_rules.find(w => wave <= w.max_height_m) || rules.global_wave_rules[rules.global_wave_rules.length - 1];
   
   let windRule = rules.rules.find(r => r.id !== "parallel_or_other" && dir >= r.dir_min_deg && dir <= r.dir_max_deg);
@@ -325,9 +336,9 @@ function evaluateStatus(speed, dir, wave, config) {
   const windThreshold = windRule.thresholds.find(t => adjSpeed <= t.max_speed_kmh) || windRule.thresholds[windRule.thresholds.length - 1];
 
   if (waveRule.level > windThreshold.level) {
-    return { badge: waveRule.badge, desc: waveRule.desc, color: waveRule.color, adjSpeed: adjSpeed.toFixed(1) };
+    return { badge: waveRule.badge, desc: waveRule.desc, color: waveRule.color, adjSpeed: adjSpeed.toFixed(1), adjGust: adjGust != null ? adjGust.toFixed(1) : null };
   } else {
-    return { badge: windThreshold.badge, desc: windThreshold.desc, color: windThreshold.color, adjSpeed: adjSpeed.toFixed(1) };
+    return { badge: windThreshold.badge, desc: windThreshold.desc, color: windThreshold.color, adjSpeed: adjSpeed.toFixed(1), adjGust: adjGust != null ? adjGust.toFixed(1) : null };
   }
 }
 
@@ -344,11 +355,17 @@ function renderUI(forecast, currentHourReal, dayIndex) {
     const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
     return `${day} ${months[d.getMonth()]}`;
   };
-  const dayNames = [texts.day_selector.day_0, getFormattedDate(1), getFormattedDate(2)];
+  const dayNames = [
+    (texts.day_selector && texts.day_selector.day_0) || 'Hoy',
+    (texts.day_selector && texts.day_selector.day_1) || 'Hoy+1',
+    (texts.day_selector && texts.day_selector.day_2) || 'Hoy+2'
+  ];
   const isToday = (dayIndex === 0);
 
   let activeForecast = forecast.find(f => f.hour === currentHourReal && isToday);
   if (!activeForecast) activeForecast = forecast[0];
+
+  const gustsLabel = texts.main_card && texts.main_card.gusts_label ? texts.main_card.gusts_label : 'Rachas';
 
   document.getElementById('main-status-card').style.backgroundColor = activeForecast.color;
   document.getElementById('card-time').textContent = isToday && currentHourReal >= 8 && currentHourReal <= 23 ? texts.main_card.now_label : `${texts.main_card.forecast_prefix} ${activeForecast.hour}:00h`;
@@ -417,10 +434,10 @@ function renderUI(forecast, currentHourReal, dayIndex) {
           <span class="align-middle mr-1.5" style="display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 9999px; background-color: rgba(0, 114, 206, 0.15); color: #0072ce;" title="Dirección del viento: ${item.dir}°">
             ${getWindArrowSVG(item.dir, 14, "#0072ce")}
           </span>
-          <span class="align-middle">${item.adjSpeed} <span class="text-xs sm:text-sm font-normal text-slate-500">km/h</span></span>
+          <span class="align-middle">${item.adjSpeed} <span class="font-normal text-slate-500">km/h</span>${item.adjGust != null ? ` <span class="text-xs sm:text-sm font-normal text-slate-500">| ${item.adjGust} km/h</span>` : ''}</span>
         </div>
         <div class="w-full text-right font-bold text-slate-800 text-sm sm:text-base">
-          🌊 ${item.wave} m${item.waterTemp != null ? ` <span class="font-normal text-slate-500">| ${item.waterTemp.toFixed(1)}°C</span>` : ''}
+          🌊 ${item.wave} m${item.waterTemp != null ? ` <span class="text-xs sm:text-sm font-normal text-slate-500">| ${item.waterTemp.toFixed(1)}°C</span>` : ''}
         </div>
         <p class="w-full text-right text-slate-500 text-xs sm:text-sm">🌡️ <span class="font-bold text-slate-700">${item.temp}°C</span> | UV: ${Math.round(item.uv)}</p>
       </div>
