@@ -52,7 +52,7 @@ const fallbackUITexts = {
     "water_temp_label": "🏊 Temp. Agua",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
-  "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
+  "day_selector": { "day_0": "HOY", "day_1": "Hoy+1", "day_2": "Hoy+2" },
   "hourly_section": {
     "title": "Evolución (08:00 - 23:00)",
     "optimal_badge": "✨ Óptimo",
@@ -337,7 +337,14 @@ function getWindArrowSVG(dir, sizePx = 20, strokeColor = "currentColor") {
 
 function renderUI(forecast, currentHourReal, dayIndex) {
   const texts = uiTextsConfig || fallbackUITexts;
-  const dayNames = [texts.day_selector.day_0, texts.day_selector.day_1, texts.day_selector.day_2];
+  const getFormattedDate = (offsetDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    const day = d.getDate();
+    const months = ["ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC"];
+    return `${day} ${months[d.getMonth()]}`;
+  };
+  const dayNames = [texts.day_selector.day_0, getFormattedDate(1), getFormattedDate(2)];
   const isToday = (dayIndex === 0);
 
   let activeForecast = forecast.find(f => f.hour === currentHourReal && isToday);
