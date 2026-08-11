@@ -329,11 +329,14 @@ function evaluateStatus(speed, dir, wave, config, gust = null) {
   const factor = rules.beach_info ? rules.beach_info.wind_adjustment_factor : 1.125;
   const adjSpeed = speed * factor;
   const adjGust = gust != null ? parseFloat((gust * factor).toFixed(1)) : null;
+  const alpha = 0.5;
+  const effSpeed = (adjGust != null && adjGust > adjSpeed) ? (adjSpeed + alpha * (adjGust - adjSpeed)) : adjSpeed;
+
   const waveRule = rules.global_wave_rules.find(w => wave <= w.max_height_m) || rules.global_wave_rules[rules.global_wave_rules.length - 1];
   
   let windRule = rules.rules.find(r => r.id !== "parallel_or_other" && dir >= r.dir_min_deg && dir <= r.dir_max_deg);
   if (!windRule) windRule = rules.rules.find(r => r.id === "parallel_or_other");
-  const windThreshold = windRule.thresholds.find(t => adjSpeed <= t.max_speed_kmh) || windRule.thresholds[windRule.thresholds.length - 1];
+  const windThreshold = windRule.thresholds.find(t => effSpeed <= t.max_speed_kmh) || windRule.thresholds[windRule.thresholds.length - 1];
 
   if (waveRule.level > windThreshold.level) {
     return { badge: waveRule.badge, desc: waveRule.desc, color: waveRule.color, adjSpeed: adjSpeed.toFixed(1), adjGust: adjGust != null ? adjGust.toFixed(1) : null };
