@@ -27,7 +27,7 @@
     "sparkline_title_prefix": "Tendencia del Viento"
   },
   "day_selector": {
-    "day_0": "Hoy",
+    "day_0": "HOY",
     "day_1": "Hoy+1",
     "day_2": "Hoy+2"
   },

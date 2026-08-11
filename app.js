@@ -53,7 +53,7 @@ const fallbackUITexts = {
     "gusts_label": "Rachas",
     "sparkline_title_prefix": "Tendencia del Viento"
   },
-  "day_selector": { "day_0": "Hoy", "day_1": "Hoy+1", "day_2": "Hoy+2" },
+  "day_selector": { "day_0": "HOY", "day_1": "Hoy+1", "day_2": "Hoy+2" },
   "hourly_section": {
     "title": "Evolución (08:00 - 23:00)",
     "optimal_badge": "✨ Óptimo",
@@ -359,9 +359,9 @@ function renderUI(forecast, currentHourReal, dayIndex) {
     return `${day} ${months[d.getMonth()]}`;
   };
   const dayNames = [
-    (texts.day_selector && texts.day_selector.day_0) || 'Hoy',
-    (texts.day_selector && texts.day_selector.day_1) || 'Hoy+1',
-    (texts.day_selector && texts.day_selector.day_2) || 'Hoy+2'
+    (texts.day_selector && texts.day_selector.day_0) || 'HOY',
+    getFormattedDate(1),
+    getFormattedDate(2)
   ];
   const isToday = (dayIndex === 0);
 

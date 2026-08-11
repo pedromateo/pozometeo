@@ -125,26 +125,26 @@ try {
       }
     }
 
-    // Test 6: Day selector buttons existence (Hoy, Hoy+1, Hoy+2)
+    // Test 6: Day selector buttons existence (HOY, fecha+1, fecha+2)
     const btn0 = document.getElementById('btn-day-0');
     const btn1 = document.getElementById('btn-day-1');
     const btn2 = document.getElementById('btn-day-2');
-    if (btn0 && btn1 && btn2 && btn0.textContent.trim() === 'Hoy' && btn1.textContent.trim() === 'Hoy+1' && btn2.textContent.trim() === 'Hoy+2') {
-      console.log('✅ TEST 6 PASADO: Botones de selección de 3 días (Hoy, Hoy+1, Hoy+2) presentes en el DOM.');
+    if (btn0 && btn1 && btn2 && btn0.textContent.trim() === 'HOY' && btn1.textContent.trim().length > 0 && btn2.textContent.trim().length > 0) {
+      console.log('✅ TEST 6 PASADO: Botones de selección de 3 días (HOY, fecha+1, fecha+2) presentes en el DOM.');
     } else {
       console.error('❌ TEST 6 FALLADO: Botones del selector de día faltantes o con etiquetas incorrectas.');
       failed = true;
     }
 
-    // Test 7: Default selection is Hoy (btn-day-0 active)
+    // Test 7: Default selection is HOY (btn-day-0 active)
     if (btn0 && btn0.className.includes('bg-[#0072ce]') && !btn1.className.includes('bg-[#0072ce]')) {
-      console.log('✅ TEST 7 PASADO: El selector por defecto tiene "Hoy" seleccionado.');
+      console.log('✅ TEST 7 PASADO: El selector por defecto tiene "HOY" seleccionado.');
     } else {
-      console.error('❌ TEST 7 FALLADO: "Hoy" no aparece seleccionado por defecto.');
+      console.error('❌ TEST 7 FALLADO: "HOY" no aparece seleccionado por defecto.');
       failed = true;
     }
 
-    // Test 8: Interactive day switching (Hoy+1 and Hoy+2)
+    // Test 8: Interactive day switching (Hoy+1 and Hoy+2 dynamic dates)
     if (typeof window.selectDay === 'function') {
       window.selectDay(1); // Click Hoy+1
       const titleDay1 = document.getElementById('sparkline-title') ? document.getElementById('sparkline-title').textContent : '';
@@ -154,8 +154,8 @@ try {
       const titleDay2 = document.getElementById('sparkline-title') ? document.getElementById('sparkline-title').textContent : '';
       const day2Selected = btn2.className.includes('bg-[#0072ce]') && !btn1.className.includes('bg-[#0072ce]');
 
-      if (day1Selected && day2Selected && titleDay1.includes('Hoy+1') && titleDay2.includes('Hoy+2')) {
-        console.log('✅ TEST 8 PASADO: Transición entre Hoy, Hoy+1 y Hoy+2 actualiza la UI y tendencia de viento correctamente.');
+      if (day1Selected && day2Selected && titleDay1.includes(btn1.textContent.trim()) && titleDay2.includes(btn2.textContent.trim())) {
+        console.log('✅ TEST 8 PASADO: Transición entre días actualiza la UI y tendencia de viento correctamente.');
       } else {
         console.error('❌ TEST 8 FALLADO: Error al cambiar de día en la previsión.');
         failed = true;
