@@ -271,11 +271,33 @@ try {
       failed = true;
     }
 
+    // Test 17: Verify hourly color blocks container (16 blocks for 08:00 - 23:00)
+    const colorBar = document.getElementById('hourly-color-bar');
+    const colorBlocks = colorBar ? colorBar.querySelectorAll('.hourly-color-block') : [];
+    if (colorBar && colorBlocks.length === 16 && colorBlocks[0].style.backgroundColor) {
+      console.log('✅ TEST 17 PASADO: Barra de bloques cuadrados de colores por hora generada correctamente (16 bloques con color asignado).');
+    } else {
+      console.error('❌ TEST 17 FALLADO: Bloques de color por hora inválidos o incompletos:', colorBlocks.length);
+      failed = true;
+    }
+
+    // Test 18: Verify hourly color labels (8h, 12h, 16h, 20h, 23h present)
+    const colorLabelsContainer = document.getElementById('hourly-color-labels');
+    const labels = colorLabelsContainer ? Array.from(colorLabelsContainer.children).map(c => c.textContent.trim()) : [];
+    const expectedLabels = ['8h', '12h', '16h', '20h', '23h'];
+    const hasAllExpectedLabels = expectedLabels.every(lbl => labels.includes(lbl));
+    if (colorLabelsContainer && labels.length === 16 && hasAllExpectedLabels) {
+      console.log('✅ TEST 18 PASADO: Indicadores de hora (8h, 12h, 16h, 20h, 23h) posicionados correctamente debajo de los bloques.');
+    } else {
+      console.error('❌ TEST 18 FALLADO: Etiquetas de hora erróneas o incompletas:', labels);
+      failed = true;
+    }
+
     if (failed) {
       console.error('\n💥 Suite de pruebas FINALIZADA CON ERRORES.');
       process.exit(1);
     } else {
-      console.log('\n🎉 TODAS LAS PRUEBAS (16/16) HAN PASADO CON ÉXITO.');
+      console.log('\n🎉 TODAS LAS PRUEBAS (18/18) HAN PASADO CON ÉXITO.');
       process.exit(0);
     }
   }, 800);

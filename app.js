@@ -396,6 +396,36 @@ function renderUI(forecast, currentHourReal, dayIndex) {
     sparklineTitle.textContent = `${texts.main_card.sparkline_title_prefix} ${dayNames[dayIndex] || dayNames[0]}`;
   }
 
+  // Renderizar la barra de bloques cuadrados de colores por hora (8:00 - 23:00) y sus marcas horarias
+  const colorBarContainer = document.getElementById('hourly-color-bar');
+  const colorLabelsContainer = document.getElementById('hourly-color-labels');
+
+  if (colorBarContainer && colorLabelsContainer) {
+    colorBarContainer.innerHTML = '';
+    colorLabelsContainer.innerHTML = '';
+
+    const targetHoursWithLabels = [8, 12, 16, 20, 23];
+
+    forecast.forEach(item => {
+      // Bloque de color representativo de la seguridad de esa hora
+      const block = document.createElement('div');
+      block.className = 'hourly-color-block';
+      block.style.backgroundColor = item.color;
+      block.title = `${String(item.hour).padStart(2, '0')}:00h - ${item.badge} (${item.desc})`;
+      colorBarContainer.appendChild(block);
+
+      // Indicador de hora correspondiente (8, 12, 16, 20, 23)
+      const label = document.createElement('div');
+      label.className = 'hourly-color-label';
+      if (targetHoursWithLabels.includes(item.hour)) {
+        label.textContent = `${item.hour}h`;
+      } else {
+        label.innerHTML = '&nbsp;';
+      }
+      colorLabelsContainer.appendChild(label);
+    });
+  }
+
   // Update Day Selector Buttons
   [0, 1, 2].forEach(i => {
     const btn = document.getElementById(`btn-day-${i}`);
