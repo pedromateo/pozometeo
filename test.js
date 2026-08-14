@@ -183,8 +183,8 @@ try {
     }
 
     // Test 11: Verify UI texts externalization via ui_texts.json
-    const headerTitleEl = document.getElementById('header-title');
-    if (headerTitleEl && headerTitleEl.textContent === 'Pozo del Esparto') {
+    const hourlyTitleEl = document.getElementById('hourly-title');
+    if (hourlyTitleEl && hourlyTitleEl.textContent === 'Evolución (08:00 - 23:00)') {
       console.log('✅ TEST 11 PASADO: Textos de la UI cargados e inyectados correctamente desde ui_texts.json.');
     } else {
       console.error('❌ TEST 11 FALLADO: Error inyectando textos desde ui_texts.json.');
