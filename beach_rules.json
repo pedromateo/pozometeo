@@ -28,8 +28,8 @@
       "dir_max_deg": 100,
       "thresholds": [
         { "max_speed_kmh": 6,  "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Mar en calma chicha" },
-        { "max_speed_kmh": 13, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" },
-        { "max_speed_kmh": 17, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" },
+        { "max_speed_kmh": 14, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Mar en calma" },
+        { "max_speed_kmh": 20, "level": 2, "badge": "🟡 Aceptable", "color": "#F59E0B", "desc": "Ligero oleaje de frente" },
         { "max_speed_kmh": 999,"level": 3, "badge": "🟠 Difícil", "color": "#F97316", "desc": "Olas por viento de levante" }
       ]
     },
