@@ -18,7 +18,7 @@ let uiTextsConfig = null;
 let currentRulesConfig = null;
 
 const fallbackRulesConfig = {
-  "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125 },
+  "beach_info": { "id": "pozo_del_esparto", "name": "Pozo del Esparto", "wind_adjustment_factor": 1.125, "gust_alpha": 0.3 },
   "global_wave_rules": [
     { "max_height_m": 0.3, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Calma chicha" },
     { "max_height_m": 0.6, "level": 1, "badge": "🟢 Bueno", "color": "#10B981", "desc": "Oleaje tranquilo" },
@@ -329,7 +329,7 @@ function evaluateStatus(speed, dir, wave, config, gust = null) {
   const factor = rules.beach_info ? rules.beach_info.wind_adjustment_factor : 1.125;
   const adjSpeed = speed * factor;
   const adjGust = gust != null ? parseFloat((gust * factor).toFixed(1)) : null;
-  const alpha = 0.5;
+  const alpha = rules.beach_info && rules.beach_info.gust_alpha !== undefined ? rules.beach_info.gust_alpha : 0.3;
   const effSpeed = (adjGust != null && adjGust > adjSpeed) ? (adjSpeed + alpha * (adjGust - adjSpeed)) : adjSpeed;
 
   const waveRule = rules.global_wave_rules.find(w => wave <= w.max_height_m) || rules.global_wave_rules[rules.global_wave_rules.length - 1];

@@ -34,7 +34,8 @@ Para lograr máxima precisión, el sistema realiza peticiones simultáneas a 3 m
 
 - **Velocidad del viento:** Se calcula como la media aritmética de los tres modelos:
   $$\text{Velocidad Media} = \frac{v_{\text{ecmwf}} + v_{\text{gfs}} + v_{\text{icon}}}{3}$$
-- **Ajuste de Orilla (Shore Factor):** `wind_adjustment_factor = 1.125` (+12.5% sobre la velocidad media para prever rachas en la linde del agua).
+- **Ajuste de Orilla (Shore Factor):** `wind_adjustment_factor = 1.125` (+12.5% sobre la velocidad y racha media en la linde del agua).
+- **Ponderación de Racha en Velocidad Efectiva:** `gust_alpha = 0.3` (suma el 30% del exceso de racha sobre el viento sostenido: $v_{\text{efectiva}} = v_{\text{sostenido}} + 0.3 \times (v_{\text{racha}} - v_{\text{sostenido}})$).
 - **Dirección del viento:** Se calcula mediante la **media vectorial/trigonométrica** (para evitar fallos en el cambio 359° ↔ 0°):
   $$\bar{X} = \sum \cos(\theta_i), \quad \bar{Y} = \sum \sin(\theta_i), \quad \bar{\theta} = \text{atan2}(\bar{Y}, \bar{X}) \pmod{360^\circ}$$
 

@@ -2,7 +2,8 @@
   "beach_info": {
     "id": "pozo_del_esparto",
     "name": "Pozo del Esparto",
-    "wind_adjustment_factor": 1.125
+    "wind_adjustment_factor": 1.125,
+    "gust_alpha": 0.3
   },
   "global_wave_rules": [
     { "max_height_m": 0.2, "level": 1, "badge": "🟢 Excelente", "color": "#10B981", "desc": "Calma chicha" },
